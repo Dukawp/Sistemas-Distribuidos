@@ -117,7 +117,7 @@ class CWriter implements Runnable{
                     else{
                         trataLogin();
                     }*/
-                    break;
+                     break;
                 case 0 :
                     logout();
                     break;

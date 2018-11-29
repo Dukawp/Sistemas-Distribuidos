@@ -21,6 +21,25 @@ import java.util.logging.Logger;
  * @author Duka_
  */
 
+class SWriter implements Runnable{
+    
+    private Socket cs;
+    
+    public SWriter(Socket cs){
+        this.cs = cs;
+    }
+    
+    public void run(){
+        try{
+            PrintWriter out = new PrintWriter(cs.getOutputStream());
+            // ESCREVER PARA O TAL LOG ???
+        } catch (IOException ex) {
+            Logger.getLogger(SWriter.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+}
+
+
 class SHandler implements Runnable {
     private final Socket cs;
     private final Contas contas;
@@ -107,6 +126,7 @@ public class Server {
             System.out.println("Novo Cliente!!"); // so para ver se esta tudo direito....
             
             Thread ts = new Thread(new SHandler(cs, c,v));
+            Thread tw = new Thread(new SWriter(cs));
             
             ts.start();
         }
