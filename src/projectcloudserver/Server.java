@@ -24,12 +24,13 @@ import java.util.logging.Logger;
 class SHandler implements Runnable {
     private final Socket cs;
     private final Contas contas;
-    //private Servidores servidores; Falta fazer a class dos Servidores!!!!!!
+    private Servidores servidores; 
     private final ReentrantLock l;
     
-    public SHandler(Socket cs, Contas contas){
+    public SHandler(Socket cs, Contas contas,Servidores servidores){
         this.cs = cs;
         this.contas = contas;
+        this.servidores = servidores;
         this.l = new ReentrantLock();
     }
     
@@ -92,7 +93,7 @@ public class Server {
         int port = 1234;
         ServerSocket ss = new ServerSocket(port);
         Contas c = new Contas();
-        
+        Servidores v = new Servidores();
         
         //contas para teste...
         c.registaUser("a", "a");
@@ -105,7 +106,7 @@ public class Server {
             
             System.out.println("Novo Cliente!!"); // so para ver se esta tudo direito....
             
-            Thread ts = new Thread(new SHandler(cs, c));
+            Thread ts = new Thread(new SHandler(cs, c,v));
             
             ts.start();
         }
