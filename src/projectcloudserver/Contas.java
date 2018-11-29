@@ -19,7 +19,7 @@ public class Contas {
     ReentrantLock l = new ReentrantLock();
 
     public Contas(){
-        this.utilizadores = new HashMap<String,Utilizador>();
+        this.utilizadores = new HashMap<>();
         this.l = new ReentrantLock();
     }
 
