@@ -45,6 +45,7 @@ class SHandler implements Runnable {
     @Override
     public void run(){
         try{
+            boolean r;
             String scan;
             String[] divide;
             while((scan=in.readLine())!= null){
@@ -57,7 +58,10 @@ class SHandler implements Runnable {
                         try{
                             l.lock();
                             try {
-                                contas.registaUser(divide[1],divide[2]);
+                                r = contas.registaUser(divide[1],divide[2]);
+                                if(r) out.println("true");
+                                else out.println("false");
+                                out.flush();
                             } catch (ClienteExistenteException e) {
                                 Logger.getLogger(SHandler.class.getName()).log(Level.SEVERE, null, e);
                             }
@@ -72,7 +76,6 @@ class SHandler implements Runnable {
                         l.lock();
                         try {
                             String username = divide[1];
-                            boolean r;
                             r = contas.efetuaLogin(username, divide[2]);
                             if(r) out.println("true");
                             else out.println("false");

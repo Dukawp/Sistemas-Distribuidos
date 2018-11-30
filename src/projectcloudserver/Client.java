@@ -87,6 +87,10 @@ class CHandler implements Runnable{
             switch(choice){
                 case 1 :
                     trataRegisto();
+                    if( (linha=in.readLine()) != null){
+                        if(linha.equals("true")) displayMenuP();
+                        else trataRegisto();
+                    } 
                     break;
                 case 2 :
                     trataLogin();

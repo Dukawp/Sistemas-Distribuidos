@@ -35,18 +35,16 @@ public class Contas {
         this.utilizadores = utilizadores;
     }
     
-    public void registaUser(String username, String password) throws ClienteExistenteException{
+    public boolean registaUser(String username, String password) throws ClienteExistenteException{
         l.lock();
         try {
             if(!utilizadores.containsKey(username)){
+                System.out.println("Cliente registado!!");
                 Utilizador user = new Utilizador(username,password,false);
                 utilizadores.put(username,user);
-                System.out.println("Utilizador registado com sucesso!!");
+                return true;
             }
-            else{
-                System.out.println("Utilizador ja existe");
-                throw new ClienteExistenteException("Utilizador: " + username + " já existe");
-            }
+            return false;
         } finally {
             l.unlock();
         }
