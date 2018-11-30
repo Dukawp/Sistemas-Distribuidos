@@ -21,42 +21,30 @@ import java.util.logging.Logger;
  * @author Duka_
  */
 
-class SWriter implements Runnable{
-    
-    private Socket cs;
-    
-    public SWriter(Socket cs){
-        this.cs = cs;
-    }
-    
-    public void run(){
-        try{
-            PrintWriter out = new PrintWriter(cs.getOutputStream());
-            // ESCREVER PARA O TAL LOG ???
-        } catch (IOException ex) {
-            Logger.getLogger(SWriter.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-}
 
 
 class SHandler implements Runnable {
     private final Socket cs;
     private final Contas contas;
-    private Servidores servidores; 
+    private final Servidores servidores; 
     private final ReentrantLock l;
+    private final BufferedReader in;
+    private final PrintWriter out;
     
-    public SHandler(Socket cs, Contas contas,Servidores servidores){
+    public SHandler(Socket cs, Contas contas,Servidores servidores) throws IOException{
         this.cs = cs;
         this.contas = contas;
         this.servidores = servidores;
+        this.out = new PrintWriter(cs.getOutputStream(), true);
+        this.in = new BufferedReader(new InputStreamReader(cs.getInputStream()));
+
+
         this.l = new ReentrantLock();
     }
     
     @Override
     public void run(){
         try{
-            BufferedReader in = new BufferedReader(new InputStreamReader(cs.getInputStream()));
             String scan;
             String[] divide;
             while((scan=in.readLine())!= null){
@@ -86,8 +74,9 @@ class SHandler implements Runnable {
                             String username = divide[1];
                             boolean r;
                             r = contas.efetuaLogin(username, divide[2]);
-                            // TER AQUI UM OUT PARA MANDAR PARA O CLIENT?? OU ADICIONAR A UMA ESPECIE DE LOG(QUEUE) E O SWRITER TRATA DISSO ???
-                            //AVISAR O CLIENT QUE LOGIN TEVE SUCESSO
+                            if(r) out.println("true");
+                            else out.println("false");
+                            out.flush();
                         } catch (ClienteExistenteException ex) {
                             Logger.getLogger(SHandler.class.getName()).log(Level.SEVERE, null, ex);
                         } 
@@ -126,7 +115,6 @@ public class Server {
             System.out.println("Novo Cliente!!"); // so para ver se esta tudo direito....
             
             Thread ts = new Thread(new SHandler(cs, c,v));
-            Thread tw = new Thread(new SWriter(cs));
             
             ts.start();
         }

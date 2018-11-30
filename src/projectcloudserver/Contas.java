@@ -56,8 +56,8 @@ public class Contas {
         l.lock();
         //System.out.println("ENTRALOGIN");
         if((utilizadores.containsKey(username))&&(utilizadores.get(username).getPassword().equals(password))){
-            //System.out.println("DADOS::::"+utilizadores.get(username).getPassword());
-            //System.out.println("Login efetuado");
+            System.out.println("DADOS::::"+utilizadores.get(username).getPassword());
+            System.out.println("Login efetuado");
             l.unlock();
             return true;
         }
