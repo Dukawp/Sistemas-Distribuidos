@@ -61,24 +61,41 @@ class CHandler implements Runnable{
     
     public void displayMenuLogged() throws IOException, InterruptedException{
         System.out.println("1 - Ver Servidores");
+        System.out.println("2 - Ver leiloes");
+        System.out.println("3 - Ver meus servidores e valor em divida");
         System.out.println("0 - Logout");
         executarL();
     }
     
     private void executarL() throws IOException, InterruptedException{
-        Scanner scanner = new Scanner(System.in);
+            Scanner scanner = new Scanner(System.in);
             int choice  = scanner.nextInt();
-            
-            
+            String linha;
+
             switch(choice){
-                case 1:
-                    //dicidir que casos temos 1º
-                default :
+                case 1 :
+                    verServers();
+                    if( (linha=in.readLine()) != null){
+                        System.out.println(linha);
+                    } 
+                    break;
+                case 2 :
+                    trataLogin();
+                    //FALTA VERIFICAR SE LOGIN TEVE SUCESSO PARA DECIDIR QUE MENU MOSTRAR!!!!
+                    if( (linha=in.readLine()) != null){
+                        if(linha.equals("true")) displayMenuLogged();
+                        else trataLogin();
+                    } 
+                    break;
+                case 0 :
+                    logout();
+                    break;
+                default : 
                     System.out.println("Opçao invalida....");
                     displayMenuLogged();
             }
     }
-    //VER SE HA FORMA DE DIZER EM QUE MENU ESTA PARA ENTRAR EM CASE DIFERENTE .. EX MENUP - REGISTAR -> CASE P1
+    
     private void executarP() throws IOException, InterruptedException{
             Scanner scanner = new Scanner(System.in);
             int choice  = scanner.nextInt();
@@ -107,10 +124,71 @@ class CHandler implements Runnable{
                     System.out.println("Opçao invalida....");
                     displayMenuP();
             }
-        
+    }
+   
+    
+    private void verServers() throws IOException{
+        System.out.println("1 - Ver m5...");
+        System.out.println("2 - Ver t3...");
+        System.out.println("3 - Ver a2...");
+        System.out.println("4 - Ver c1...");
+        Scanner scanner = new Scanner(System.in);
+            int choice  = scanner.nextInt();
+            String linha;
+            
+            switch(choice){
+                case 1 :
+                    out.println("ls "+"m5");
+                    out.flush();
+                    break;
+                case 2 :
+                    out.println("ls "+"t3");
+                    out.flush();
+                    break;
+                case 3 :
+                    out.println("ls "+"a2");
+                    out.flush();
+                    break;
+                
+                case 4 :
+                    out.println("ls "+"c1");
+                    out.flush();
+                    break;
+                default : 
+                    System.out.println("Opçao invalida....");
+                    verServers();
+            }
+        if( (linha=in.readLine()) != null){
+            System.out.println(linha);
+        }
+        ReservarServer();
+    }
+    
+    private void ReservarServer(String tipo) throws IOException, InterruptedException{
+        Scanner scanner = new Scanner(System.in);
+        int choice  = scanner.nextInt();
+        System.out.println("1 - Reservar servidor");
+        System.out.println("0 - Voltar ao menu anterior");
+        String linha;
+        switch(choice){
+                case 1 :
+                    out.println("res "+tipo);
+                    out.flush();
+                    if((linha = in.readLine()) != null){
+                        if(linha.equals("-1")){
+                            System.out.println("Ja esta reservado!");
+                        }
+                    }
+                    //FALTA ADICIONAR ARRAY COM ID DO SERVER
+                case 0 :
+                    displayMenuLogged();
+                default :
+                    System.out.println("Opçao invalida....");
+                    ReservarServer(tipo);
         
         }
-   
+    }
+    
     
     private void trataRegisto(){
         System.out.println("Username: ");

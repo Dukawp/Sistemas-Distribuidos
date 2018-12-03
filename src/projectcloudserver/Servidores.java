@@ -16,8 +16,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class Servidores {
  
     Map<Integer,Servidor> servidores;  // identificador de reserva ???
-    ReentrantLock l = new ReentrantLock();
-    
+    ReentrantLock l = new ReentrantLock();    
     
     public Servidores(){
         this.servidores = new HashMap<>();

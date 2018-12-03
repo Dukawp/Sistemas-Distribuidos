@@ -12,6 +12,7 @@ import java.io.PrintWriter;
 import static java.lang.Thread.sleep;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -69,6 +70,24 @@ class SHandler implements Runnable {
                             l.unlock();
                         }
                     
+                    break;       
+                    
+                    case "ls":
+                        try{
+                            l.lock();
+                            int count = 0;
+                            for(Servidor s : servidores.getServidores().values()){
+                                if((s.getServerName().equals(divide[1])) && s.getDisponivel()){
+                                        count++;
+                                    }
+                                out.println("Tipo -> " + s.getServerName());
+                                out.println("Preço -> " + s.getPreco());
+                                out.println("Total disponiveis ->" + count);
+                                out.flush();
+                            }
+                        }finally{
+                            l.unlock();
+                        }
                     break;       
                     
                     case"logi":

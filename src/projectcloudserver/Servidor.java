@@ -15,16 +15,22 @@ public class Servidor {
     private final double preco; //preç´o é fixo!
     private final int id;
     private boolean disponivel;
+    private boolean leilao;
     
     public Servidor(String servername, double preco, int id){
         this.servername = servername;
         this.preco = preco;
         this.id = id;
         this.disponivel = true;
+        this.leilao = false;
     }
     
     public boolean getDisponivel(){
         return this.disponivel;
+    }
+    
+    public boolean getLeilao(){
+        return this.leilao;
     }
     
     public String getServerName(){
@@ -41,6 +47,10 @@ public class Servidor {
     
     public void setDisponivel(boolean disponivel){
         this.disponivel = disponivel;
+    }
+    
+    public void setLeilao(boolean leilao){
+        this.leilao = leilao;
     }
    
 }
