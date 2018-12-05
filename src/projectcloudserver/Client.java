@@ -79,14 +79,6 @@ class CHandler implements Runnable{
                         System.out.println(linha);
                     } 
                     break;
-                case 2 :
-                    trataLogin();
-                    //FALTA VERIFICAR SE LOGIN TEVE SUCESSO PARA DECIDIR QUE MENU MOSTRAR!!!!
-                    if( (linha=in.readLine()) != null){
-                        if(linha.equals("true")) displayMenuLogged();
-                        else trataLogin();
-                    } 
-                    break;
                 case 0 :
                     logout();
                     break;
@@ -106,15 +98,32 @@ class CHandler implements Runnable{
                     trataRegisto();
                     if( (linha=in.readLine()) != null){
                         if(linha.equals("true")) displayMenuP();
-                        else trataRegisto();
+                        else {
+                            System.out.println("Username já está a ser usado!");
+                            displayMenuP();
+                        }
                     } 
                     break;
                 case 2 :
                     trataLogin();
-                    //FALTA VERIFICAR SE LOGIN TEVE SUCESSO PARA DECIDIR QUE MENU MOSTRAR!!!!
                     if( (linha=in.readLine()) != null){
-                        if(linha.equals("true")) displayMenuLogged();
-                        else trataLogin();
+                        int num = Integer.parseInt(linha);
+                        if( num == 1 ) {
+                            System.out.println("Bem vindo !");
+                            displayMenuLogged();
+                        }
+                        if( num == 0 ){
+                            System.out.println("Utilizador já está loggado");
+                            displayMenuP();
+                        }
+                        if( num == -1){
+                            System.out.println("Password errada!");
+                            displayMenuP();
+                        }
+                        else {
+                            System.out.println("Utilizador não existe!");
+                            displayMenuP();
+                        }
                     } 
                     break;
                 case 0 :
@@ -132,26 +141,30 @@ class CHandler implements Runnable{
         System.out.println("2 - Ver t3...");
         System.out.println("3 - Ver a2...");
         System.out.println("4 - Ver c1...");
+        String tipo = null;
         Scanner scanner = new Scanner(System.in);
             int choice  = scanner.nextInt();
             String linha;
-            
             switch(choice){
                 case 1 :
-                    out.println("ls "+"m5");
+                    out.println("ls "+" "+"m5");
+                    tipo = "m5";
                     out.flush();
                     break;
                 case 2 :
-                    out.println("ls "+"t3");
+                    out.println("ls "+" "+"t3");
+                    tipo = "t3";
                     out.flush();
                     break;
                 case 3 :
-                    out.println("ls "+"a2");
+                    out.println("ls "+" "+"a2");
+                    tipo = "a2";
                     out.flush();
                     break;
                 
                 case 4 :
-                    out.println("ls "+"c1");
+                    out.println("ls "+" "+"c1");
+                    tipo = "c1";
                     out.flush();
                     break;
                 default : 
@@ -161,7 +174,11 @@ class CHandler implements Runnable{
         if( (linha=in.readLine()) != null){
             System.out.println(linha);
         }
-        ReservarServer();
+        try {
+            ReservarServer(tipo);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(CHandler.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     
     private void ReservarServer(String tipo) throws IOException, InterruptedException{
@@ -172,11 +189,15 @@ class CHandler implements Runnable{
         String linha;
         switch(choice){
                 case 1 :
-                    out.println("res "+tipo);
+                    out.println("res "+" "+tipo);
                     out.flush();
                     if((linha = in.readLine()) != null){
                         if(linha.equals("-1")){
                             System.out.println("Ja esta reservado!");
+                        }
+                        else{
+                            System.out.println("Servidor com ID" + linha+ "reservado!");
+                            displayMenuLogged();
                         }
                     }
                     //FALTA ADICIONAR ARRAY COM ID DO SERVER
@@ -185,7 +206,6 @@ class CHandler implements Runnable{
                 default :
                     System.out.println("Opçao invalida....");
                     ReservarServer(tipo);
-        
         }
     }
     

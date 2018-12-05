@@ -17,6 +17,7 @@ public class Servidor {
     private boolean disponivel;
     private boolean leilao;
     
+    
     public Servidor(String servername, double preco, int id){
         this.servername = servername;
         this.preco = preco;

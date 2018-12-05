@@ -9,10 +9,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import static java.lang.Thread.sleep;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -31,6 +29,8 @@ class SHandler implements Runnable {
     private final ReentrantLock l;
     private final BufferedReader in;
     private final PrintWriter out;
+    private String nome;
+
     
     public SHandler(Socket cs, Contas contas,Servidores servidores) throws IOException{
         this.cs = cs;
@@ -38,8 +38,7 @@ class SHandler implements Runnable {
         this.servidores = servidores;
         this.out = new PrintWriter(cs.getOutputStream(), true);
         this.in = new BufferedReader(new InputStreamReader(cs.getInputStream()));
-
-
+        this.nome = null;
         this.l = new ReentrantLock();
     }
     
@@ -48,19 +47,22 @@ class SHandler implements Runnable {
         try{
             boolean r;
             String scan;
+            int i;
             String[] divide;
             while((scan=in.readLine())!= null){
                 divide = scan.split(" ");
                 
                 switch(divide[0]){
                     
-                    case"reg":
+                    case"reg": //Registar
                     
                         try{
                             l.lock();
                             try {
                                 r = contas.registaUser(divide[1],divide[2]);
-                                if(r) out.println("true");
+                                if(r) {
+                                    out.println("true");
+                                }
                                 else out.println("false");
                                 out.flush();
                             } catch (ClienteExistenteException e) {
@@ -72,7 +74,7 @@ class SHandler implements Runnable {
                     
                     break;       
                     
-                    case "ls":
+                    case "ls": //lista Servers
                         try{
                             l.lock();
                             int count = 0;
@@ -90,21 +92,45 @@ class SHandler implements Runnable {
                         }
                     break;       
                     
-                    case"logi":
-                    try{
-                        l.lock();
-                        try {
-                            String username = divide[1];
-                            r = contas.efetuaLogin(username, divide[2]);
-                            if(r) out.println("true");
-                            else out.println("false");
-                            out.flush();
-                        } catch (ClienteExistenteException ex) {
-                            Logger.getLogger(SHandler.class.getName()).log(Level.SEVERE, null, ex);
-                        } 
-                    }finally {
-                    l.unlock();
-                    }
+                    case "res": //Reserva Server
+                        try{
+                            l.lock();
+                            
+                            
+                        }finally{
+                            l.unlock();
+                        }
+                    break;
+                        
+                    case"logi": // Login
+                        try{
+                            l.lock();
+                            try {
+                                String username = divide[1];
+                                i = contas.efetuaLogin(username, divide[2]);
+                                if(i==1) {
+                                    nome = username;
+                                }
+                                out.println(i);
+                                out.flush();
+                            } catch (ClienteExistenteException ex) {
+                                Logger.getLogger(SHandler.class.getName()).log(Level.SEVERE, null, ex);
+                            } 
+                        }finally {
+                        l.unlock();
+                        }
+                    break;
+                    
+                    case "lo":
+                        try{
+                            l.lock();
+                            //FALTA METER O UTILIZADOR COM O LOGGED A FALSE
+                            cs.shutdownInput();
+                            System.out.println("Cliente saiu!!"+ nome);
+                        }finally{
+                            l.unlock();
+                        }
+                    break;
                 }
             }
                 
@@ -119,12 +145,12 @@ class SHandler implements Runnable {
 public class Server {
    
     
-   public static void main(String[] args) throws IOException, InterruptedException, ClienteExistenteException{
+   public static void main(String[] args) throws Exception{
         int port = 1234;
         ServerSocket ss = new ServerSocket(port);
         Contas c = new Contas();
         Servidores v = new Servidores();
-        
+         
         //contas para teste...
         c.registaUser("a", "a");
         c.registaUser("b", "b");

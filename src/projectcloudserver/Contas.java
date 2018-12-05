@@ -50,19 +50,32 @@ public class Contas {
         }
     }
     
-    public boolean efetuaLogin(String username, String password) throws ClienteExistenteException{
+    public int efetuaLogin(String username, String password) throws ClienteExistenteException{
         l.lock();
-        //System.out.println("ENTRALOGIN");
-        if((utilizadores.containsKey(username))&&(utilizadores.get(username).getPassword().equals(password))){
-            System.out.println("DADOS::::"+utilizadores.get(username).getPassword());
-            System.out.println("Login efetuado");
+        try {
+            //System.out.println("ENTRALOGIN");
+            if((utilizadores.containsKey(username))){
+                if((utilizadores.get(username).getPassword().equals(password))){
+                    if((utilizadores.get(username).getLog() == false)){
+                        System.out.println("DADOS::::"+utilizadores.get(username).getPassword());
+                        System.out.println("Login efetuado");
+                        utilizadores.get(username).setLog(true);
+                        return 1;
+                    }
+                    else {
+                        System.out.println("Utilizador já se encontra loggado!");
+                        return 0;
+                    }
+                }
+                else{
+                    System.out.println("Password errada!");
+                    return -1;
+                }
+            }
+            System.out.println("Username não existe!");
+        } finally {
             l.unlock();
-            return true;
         }
-        else{
-            System.out.println("Password ou username inválidos!");
-            l.unlock();
-            return false;
-        }
+        return -2;
     }    
 }
