@@ -77,5 +77,16 @@ public class Contas {
             l.unlock();
         }
         return -2;
-    }    
+    }
+    
+    public void efetuaLogout(String username){
+        l.lock();
+        try{
+            utilizadores.get(username).setLog(false);
+        }finally{
+            l.unlock();
+        }
+    }
+
+    
 }

@@ -124,7 +124,7 @@ class SHandler implements Runnable {
                     case "lo":
                         try{
                             l.lock();
-                            //FALTA METER O UTILIZADOR COM O LOGGED A FALSE
+                            contas.efetuaLogout(nome);
                             cs.shutdownInput();
                             System.out.println("Cliente saiu!!"+ nome);
                         }finally{
