@@ -27,22 +27,20 @@ public class Servidores {
         return this.servidores;
     }
     
-    public boolean efetuaReserva(int id){
+    public int efetuaReserva(String tipo){
         l.lock();
-        boolean r = false;
+        int r = -1 ;
         try {
-            Servidor s;
-            s = servidores.get(id);
+            for(Servidor s : servidores.values())// FALTA TRATAR NO CASO DO SERVER ESTAR EM LEILAO!!!!
             if(s.getDisponivel()){
-                r = true;
-                s.setDisponivel(!r);
+                r = s.getID();
+                s.setDisponivel(false);
             }
         } finally {
             l.unlock();
         }
         return r;
         
-    }
-    
+    }    
     
 }

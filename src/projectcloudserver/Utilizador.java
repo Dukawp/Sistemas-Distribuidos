@@ -19,7 +19,7 @@ public class Utilizador {
     private String username;
     private String password;
     private boolean logged;//true->login efetuado;false->logout efetuado
-    private Map<Integer,Servidor> meuServers ;
+    private Map<Integer,Servidor> meuServers;
 
 
     public Utilizador(String username, String password, boolean log) {

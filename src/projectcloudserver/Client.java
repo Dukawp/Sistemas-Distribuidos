@@ -75,9 +75,7 @@ class CHandler implements Runnable{
             switch(choice){
                 case 1 :
                     verServers();
-                    if( (linha=in.readLine()) != null){
-                        System.out.println(linha);
-                    } 
+                    displayMenuLogged();
                     break;
                 case 0 :
                     logout();
@@ -136,7 +134,7 @@ class CHandler implements Runnable{
     }
    
     
-    private void verServers() throws IOException{
+    private void verServers() throws IOException, InterruptedException{
         System.out.println("1 - Ver m5...");
         System.out.println("2 - Ver t3...");
         System.out.println("3 - Ver a2...");
@@ -147,62 +145,74 @@ class CHandler implements Runnable{
             String linha;
             switch(choice){
                 case 1 :
-                    out.println("ls "+" "+"m5");
                     tipo = "m5";
-                    out.flush();
                     break;
                 case 2 :
-                    out.println("ls "+" "+"t3");
                     tipo = "t3";
-                    out.flush();
                     break;
                 case 3 :
-                    out.println("ls "+" "+"a2");
                     tipo = "a2";
-                    out.flush();
                     break;
-                
                 case 4 :
-                    out.println("ls "+" "+"c1");
                     tipo = "c1";
-                    out.flush();
                     break;
                 default : 
                     System.out.println("Opçao invalida....");
                     verServers();
             }
-        if( (linha=in.readLine()) != null){
+        out.println("ls"+" "+tipo);
+        out.flush();
+        System.out.println("**********************");
+        while( ((linha = in.readLine()) != null) && !(linha.equals("termina")) ){
             System.out.println(linha);
         }
-        try {
-            ReservarServer(tipo);
-        } catch (InterruptedException ex) {
-            Logger.getLogger(CHandler.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        System.out.println("**********************\n");
+        ReservarServer(tipo);
     }
     
     private void ReservarServer(String tipo) throws IOException, InterruptedException{
         Scanner scanner = new Scanner(System.in);
-        int choice  = scanner.nextInt();
-        System.out.println("1 - Reservar servidor");
+        System.out.println("1 - Reservar servidor deste tipo");
         System.out.println("0 - Voltar ao menu anterior");
         String linha;
+        int choice  = scanner.nextInt();
+
         switch(choice){
                 case 1 :
-                    out.println("res "+" "+tipo);
+                    out.println("res"+" "+tipo);
                     out.flush();
                     if((linha = in.readLine()) != null){
                         if(linha.equals("-1")){
-                            System.out.println("Ja esta reservado!");
+                            System.out.println("Sem servidores disponveis");
+                            System.out.println("Deseja ficar em fila de espera?");
+                            System.out.println("1 - Sim ");
+                            System.out.println("2 - Nao ");
+                            choice  = scanner.nextInt();
+                            switch(choice){
+                                case 1 :
+                                    out.println("sim");
+                                    out.flush();
+                                    if((linha = in.readLine()) != null){
+                                    System.out.println("Ficou em fila de espera em "+ linha + " lugar");
+                                    }
+                                    break;
+                                case 2 : 
+                                    displayMenuLogged();
+                                default :
+                                    System.out.println("Opçao invalida....");
+                                    displayMenuLogged();
+                            }
+                            
                         }
                         else{
                             System.out.println("Servidor com ID" + linha+ "reservado!");
                             displayMenuLogged();
                         }
                     }
-                    //FALTA ADICIONAR ARRAY COM ID DO SERVER
+                    break;
                 case 0 :
                     displayMenuLogged();
+                    break;
                 default :
                     System.out.println("Opçao invalida....");
                     ReservarServer(tipo);

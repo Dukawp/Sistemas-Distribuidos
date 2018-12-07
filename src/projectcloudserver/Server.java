@@ -78,15 +78,19 @@ class SHandler implements Runnable {
                         try{
                             l.lock();
                             int count = 0;
+                            double preco = 0;
                             for(Servidor s : servidores.getServidores().values()){
                                 if((s.getServerName().equals(divide[1])) && s.getDisponivel()){
                                         count++;
+                                        preco = s.getPreco();
                                     }
-                                out.println("Tipo -> " + s.getServerName());
-                                out.println("Preço -> " + s.getPreco());
-                                out.println("Total disponiveis ->" + count);
-                                out.flush();
                             }
+                            out.println("Tipo -> " + divide[1]);
+                            out.println("Preço -> " + preco);
+                            out.println("Total disponiveis ->" + count);
+                            out.println("termina");
+                            out.flush();
+
                         }finally{
                             l.unlock();
                         }
@@ -95,8 +99,23 @@ class SHandler implements Runnable {
                     case "res": //Reserva Server
                         try{
                             l.lock();
-                            
-                            
+                            i = servidores.efetuaReserva(divide[1]);
+                            if( i >= 0){
+                                Servidor s = servidores.getServidores().get(i);
+                                System.out.println("Servidor com id "+s.getID() );
+                                contas.getUtilizadores().get(nome).getMeuServers().put(i,s);
+                                out.println(s.getID());
+                            }
+                            else{
+                                out.println("-1");
+                                out.flush();
+                                String linha = in.readLine();
+                                if(linha.equals("sim")){
+                                    //COLOCAR USER EM FILA DE ESPERA -- UTILIZAR UMA QUEUE
+                                    out.println("10"); // exemplo so para testar!!!!
+                                }
+                            }
+                            out.flush();
                         }finally{
                             l.unlock();
                         }
@@ -156,6 +175,9 @@ public class Server {
         c.registaUser("b", "b");
         c.registaUser("c", "c");
         c.registaUser("d", "d");
+        
+        Servidor s = new Servidor("m5", 0.99, 1);
+        v.getServidores().put(1, s);
         
         while(true){
             Socket cs = ss.accept();
