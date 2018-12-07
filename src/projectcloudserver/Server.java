@@ -111,7 +111,7 @@ class SHandler implements Runnable {
                                 out.flush();
                                 String linha = in.readLine();
                                 if(linha.equals("sim")){
-                                    //COLOCAR USER EM FILA DE ESPERA -- UTILIZAR UMA QUEUE
+                                    //COLOCAR USER EM FILA DE ESPERA -- UTILIZAR UMA QUEUE 
                                     out.println("10"); // exemplo so para testar!!!!
                                 }
                             }

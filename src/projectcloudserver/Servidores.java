@@ -32,7 +32,7 @@ public class Servidores {
         int r = -1 ;
         try {
             for(Servidor s : servidores.values())// FALTA TRATAR NO CASO DO SERVER ESTAR EM LEILAO!!!!
-            if(s.getDisponivel()){
+            if(s.getServerName().equals(tipo) && s.getDisponivel()){
                 r = s.getID();
                 s.setDisponivel(false);
             }
@@ -41,6 +41,20 @@ public class Servidores {
         }
         return r;
         
-    }    
+    }
+
+    public int libertaServer(int id){
+        l.lock();
+        int r = -1 ; // -1 erro a libertar!!!!!!!!
+        try{
+            if(servidores.containsKey(id)){
+                servidores.get(id).setDisponivel(true);
+                r = 0; // libertado com sucesso!!!
+            }
+        } finally {
+            l.unlock();
+        }
+        return r;  
+    }
     
 }

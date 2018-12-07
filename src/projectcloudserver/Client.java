@@ -77,6 +77,12 @@ class CHandler implements Runnable{
                     verServers();
                     displayMenuLogged();
                     break;
+                case 2 :
+                    //tratar de ver os leiloes!!!!!
+                    break;
+                case 3 :
+                    //tratar de mostrar servers e valor a pagar!!!
+                    break;
                 case 0 :
                     logout();
                     break;
@@ -179,6 +185,7 @@ class CHandler implements Runnable{
 
         switch(choice){
                 case 1 :
+                    // fazer um metodo com isto !!! trataReserva ..
                     out.println("res"+" "+tipo);
                     out.flush();
                     if((linha = in.readLine()) != null){
