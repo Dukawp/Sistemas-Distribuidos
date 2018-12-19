@@ -1,9 +1,10 @@
+package projectcloudserver;
+
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import static java.lang.System.in;
 import java.net.Socket;
 import java.util.Scanner;
 import java.util.concurrent.locks.Condition;
@@ -199,8 +200,11 @@ class CHandler implements Runnable{
                                 case 1 :
                                     out.println("sim");
                                     out.flush();
+                                    if ((linha = in.readLine()) != null){
+                                    System.out.println("Ficou em fila de espera em "+ linha + "º lugar");
+                                    }
                                     if((linha = in.readLine()) != null){
-                                    System.out.println("Ficou em fila de espera em "+ linha + " lugar");
+                                        System.out.println("Servidor " + linha +" alugado!");
                                     }
                                     break;
                                 case 2 : 
@@ -212,7 +216,7 @@ class CHandler implements Runnable{
                             
                         }
                         else{
-                            System.out.println("Servidor com ID" + linha+ "reservado!");
+                            System.out.println("Servidor com ID " + linha+ "reservado!");
                             displayMenuLogged();
                         }
                     }
@@ -224,6 +228,7 @@ class CHandler implements Runnable{
                     System.out.println("Opçao invalida....");
                     ReservarServer(tipo);
         }
+        displayMenuLogged();
     }
     
     

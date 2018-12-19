@@ -49,6 +49,8 @@ public class Servidores {
         try{
             if(servidores.containsKey(id)){
                 servidores.get(id).setDisponivel(true);
+                
+                // DAR O SIGNAL PARA A QUEUE
                 r = 0; // libertado com sucesso!!!
             }
         } finally {
