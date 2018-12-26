@@ -11,6 +11,9 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -30,6 +33,7 @@ class SHandler implements Runnable {
     private final BufferedReader in;
     private final PrintWriter out;
     private String nome;
+    private final Condition condS;
 
     
     public SHandler(Socket cs, Contas contas,Servidores servidores) throws IOException{
@@ -40,12 +44,14 @@ class SHandler implements Runnable {
         this.in = new BufferedReader(new InputStreamReader(cs.getInputStream()));
         this.nome = null;
         this.l = new ReentrantLock();
+        this.condS = l.newCondition();
     }
     
     @Override
     public void run(){
         try{
             boolean r;
+            Map<Integer,Servidor> meuS = new HashMap<>();
             String scan;
             int i;
             String[] divide;
@@ -112,6 +118,10 @@ class SHandler implements Runnable {
                                 String linha = in.readLine();
                                 if(linha.equals("sim")){
                                     //COLOCAR USER EM FILA DE ESPERA -- UTILIZAR UMA QUEUE 
+                                    //while( !condicao){
+                                      //  condicao.await();
+                                    //}
+                                    // condintion await!!
                                     out.println("10"); // exemplo so para testar!!!!
                                 }
                             }
@@ -140,6 +150,30 @@ class SHandler implements Runnable {
                         }
                     break;
                     
+                    case "lservers":
+                        try{
+                            l.lock();
+                            meuS = contas.getUtilizadores().get(nome).getMeuServers();
+                            for(Servidor s : meuS.values()){
+                                out.println(s.getID() + s.getServerName());
+                            }
+                            out.println("termina");
+                            out.flush();
+                        }finally{
+                            l.unlock();
+                        }
+                    break;
+                    case "cancelS":
+                        try{
+                            l.lock();
+                            meuS.get(divide[1]).setDisponivel(true);
+                            contas.getUtilizadores().get(nome).getMeuServers().remove(divide[1]);
+                            // condition acorda a queue!!
+                        }finally{
+                            l.unlock();
+                        }
+                    break;
+                    
                     case "lo":
                         try{
                             l.lock();
@@ -150,6 +184,8 @@ class SHandler implements Runnable {
                             l.unlock();
                         }
                     break;
+                    
+                    //default : //FAZER QUALQUER CENA
                 }
             }
                 

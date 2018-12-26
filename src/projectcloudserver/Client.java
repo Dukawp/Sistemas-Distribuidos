@@ -82,7 +82,7 @@ class CHandler implements Runnable{
                     //tratar de ver os leiloes!!!!!
                     break;
                 case 3 :
-                    //tratar de mostrar servers e valor a pagar!!!
+                    trataMServers();
                     break;
                 case 0 :
                     logout();
@@ -140,6 +140,58 @@ class CHandler implements Runnable{
             }
     }
    
+    
+    private void trataMServers() throws IOException, InterruptedException{
+        System.out.println("1 - Ver servidores");
+        System.out.println("2 - Ver valor total a pagar");
+        Scanner scanner = new Scanner(System.in);
+            int choice  = scanner.nextInt();
+            String linha;
+            switch(choice){
+                case 1 : 
+                    out.println("lservers");
+                    out.flush();
+                    while( ((linha = in.readLine()) != null) && !(linha.equals("termina")) ){
+                        System.out.println(linha);
+                    }
+                    System.out.println("1 - Cancelar reserva servidor?");
+                    System.out.println("2 - Menu principal");
+                    scanner = new Scanner(System.in);
+                    if (scanner.nextInt() == 1){
+                        trataCancel();
+                    }
+                    else{
+                        displayMenuLogged();
+                    }
+                break;
+                case 2 :
+                    //ASDASDASDASDASD
+                default : 
+                    System.out.println("Opção invalida...");
+                    trataMServers();
+            }
+            displayMenuLogged();
+        
+    }
+    
+    private void trataCancel(){
+        System.out.println("1 - Digite o ID do server que quer cancelar");
+        System.out.println("2 - Voltar ao menu anterior");        
+        Scanner scanner = new Scanner(System.in);
+        if(scanner.nextInt() == 1){
+            out.println("cancelS" + " " + scanner);
+            String linha;
+            if((linha = in.readLine()) != null){
+                if(linha.equals("sim")){
+                    System.out.println("Reserva de servidor com ID " + scanner+ " cancelada!!");
+                }
+                else {
+                    System.out.println("ID nao corresponde aos seus servidores!");
+                    trataCancel();
+                }
+            }
+        }
+    }
     
     private void verServers() throws IOException, InterruptedException{
         System.out.println("1 - Ver m5...");
