@@ -5,7 +5,12 @@
         <group>
             <file>file:/C:/Users/Duka_/Desktop/SD/18-19/ProjectCloudServer/ProjectCloudServer/src/projectcloudserver/Server.java</file>
             <file>file:/C:/Users/Duka_/Desktop/SD/18-19/ProjectCloudServer/ProjectCloudServer/src/projectcloudserver/Utilizador.java</file>
+            <file>file:/C:/Users/Duka_/Desktop/SD/18-19/ProjectCloudServer/ProjectCloudServer/src/projectcloudserver/UserQueue.java</file>
+            <file>file:/C:/Users/Duka_/Desktop/SD/18-19/ProjectCloudServer/ProjectCloudServer/src/projectcloudserver/Contas.java</file>
+            <file>file:/C:/Users/Duka_/Desktop/SD/18-19/ProjectCloudServer/ProjectCloudServer/src/projectcloudserver/Servidores.java</file>
+            <file>file:/C:/Users/Duka_/Desktop/SD/18-19/ProjectCloudServer/ProjectCloudServer/src/projectcloudserver/ClienteExistenteException.java</file>
             <file>file:/C:/Users/Duka_/Desktop/SD/18-19/ProjectCloudServer/ProjectCloudServer/src/projectcloudserver/Client.java</file>
+            <file>file:/C:/Users/Duka_/Desktop/SD/18-19/ProjectCloudServer/ProjectCloudServer/src/projectcloudserver/Servidor.java</file>
         </group>
     </open-files>
 </project-private>
