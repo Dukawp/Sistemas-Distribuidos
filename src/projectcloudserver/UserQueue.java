@@ -8,7 +8,6 @@ package projectcloudserver;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -17,28 +16,28 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class UserQueue {
 
-    private Map<String,ArrayList<String>> queue;  // <servername,username>
+    private Map<String,ArrayList<Utilizador>> tqueue;  // <servername,username>
     private ReentrantLock l = new ReentrantLock();  
-    private Condition cond = l.newCondition();
+    //private Condition cond = l.newCondition();
     
-    private UserQueue(){
-        this.queue = new HashMap<>();
+    public UserQueue(){
+        this.tqueue = new HashMap<>();
         this.l = new ReentrantLock();
-        this.cond = l.newCondition();
+        //this.cond = l.newCondition();
     }
     
     
-    public Map<String, ArrayList<String>> getUQ(){
-        return this.queue;
+    public Map<String, ArrayList<Utilizador>> getUQ(){
+        return this.tqueue;
     }
     
-    public void add(String servername, String username){
+    public void add(String servername, Utilizador user){
         try{
         l.lock();
-        ArrayList<String> aux = new ArrayList<>();
-        aux = queue.get(servername);  
-        aux.add(username);
-        put(servername,aux);   
+        ArrayList<Utilizador> aux = new ArrayList<>();
+        aux = tqueue.get(servername);  
+        aux.add(user);
+        tqueue.put(servername,aux);   
         }finally{
             l.unlock();
         }
@@ -47,7 +46,9 @@ public class UserQueue {
     public void remove(String servername){
         try{
             l.lock();
-            
+            Utilizador u = tqueue.get(servername).get(0);
+            tqueue.get(servername).remove(0);
+            u.condC.signal();
         }finally{
             l.unlock();
         }

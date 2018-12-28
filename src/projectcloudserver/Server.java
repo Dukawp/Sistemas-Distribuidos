@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.locks.Condition;
@@ -29,6 +30,7 @@ class SHandler implements Runnable {
     private final Socket cs;
     private final Contas contas;
     private final Servidores servidores; 
+    private final UserQueue userQ;
     private final ReentrantLock l;
     private final BufferedReader in;
     private final PrintWriter out;
@@ -36,10 +38,11 @@ class SHandler implements Runnable {
     private final Condition condS;
 
     
-    public SHandler(Socket cs, Contas contas,Servidores servidores) throws IOException{
+    public SHandler(Socket cs, Contas contas,Servidores servidores, UserQueue userQ) throws IOException{
         this.cs = cs;
         this.contas = contas;
         this.servidores = servidores;
+        this.userQ = userQ;
         this.out = new PrintWriter(cs.getOutputStream(), true);
         this.in = new BufferedReader(new InputStreamReader(cs.getInputStream()));
         this.nome = null;
@@ -119,7 +122,8 @@ class SHandler implements Runnable {
                                 if(linha.equals("sim")){
                                     //COLOCAR USER EM FILA DE ESPERA -- UTILIZAR UMA QUEUE 
                                     Utilizador u = contas.getUtilizadores().get(nome);
-                                    while( contas.getUtilizadores().containsKey(nome) ){// ver qual a condiçao de paragem!!!
+                                    userQ.add(divide[1], u);
+                                    while( ( userQ.getUQ().get(divide[1]).contains(u) ) ){// ver qual a condiçao de paragem!!!
                                         u.condC.await();
                                     }
                                     out.println("10"); // exemplo so para testar!!!!
@@ -170,7 +174,7 @@ class SHandler implements Runnable {
                             l.lock();
                             meuS.get(divide[1]).setDisponivel(true);
                             contas.getUtilizadores().get(nome).getMeuServers().remove(divide[1]);
-                            // condition acorda a queue!!
+                            //basta fazer remove da queue e a queue é que da o signal ao user...
                         }finally{
                             l.unlock();
                         }
@@ -207,6 +211,7 @@ public class Server {
         ServerSocket ss = new ServerSocket(port);
         Contas c = new Contas();
         Servidores v = new Servidores();
+        UserQueue q = new UserQueue();
          
         //contas para teste...
         c.registaUser("a", "a");
@@ -222,7 +227,7 @@ public class Server {
             
             System.out.println("Novo Cliente!!"); // so para ver se esta tudo direito....
             
-            Thread ts = new Thread(new SHandler(cs, c,v));
+            Thread ts = new Thread(new SHandler(cs, c, v, q));
             
             ts.start();
         }
