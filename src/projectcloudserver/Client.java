@@ -143,28 +143,43 @@ class CHandler implements Runnable{
     private void trataMServers() throws IOException, InterruptedException{
         System.out.println("1 - Ver servidores");
         System.out.println("2 - Ver valor total a pagar");
+        System.out.println("0 - Menu principal");
         Scanner scanner = new Scanner(System.in);
             int choice  = scanner.nextInt();
             String linha;
+            int i = 0;
             switch(choice){
                 case 1 : 
                     out.println("lservers");
                     out.flush();
                     while( ((linha = in.readLine()) != null) && !(linha.equals("termina")) ){
                         System.out.println(linha);
+                        i++;
                     }
-                    System.out.println("1 - Cancelar reserva servidor?");
-                    System.out.println("2 - Menu principal");
-                    scanner = new Scanner(System.in);
-                    if (scanner.nextInt() == 1){
-                        trataCancel();
+                    if(i>0){
+                        System.out.println("1 - Cancelar reserva servidor?");
+                        System.out.println("2 - Menu principal");
+                        scanner = new Scanner(System.in);
+                        if (scanner.nextInt() == 1){
+                            trataCancel();
+                        }
+                        else{
+                            System.out.println("Opção invalida...");
+                            displayMenuLogged();
+                        }
                     }
                     else{
-                        displayMenuLogged();
+                        System.out.println("Não possui servidores!");
+                        trataMServers();
                     }
                 break;
                 case 2 :
                     //ASDASDASDASDASD
+                break;
+                case 0 :
+                    displayMenuLogged();
+                break;
+                    
                 default : 
                     System.out.println("Opção invalida...");
                     trataMServers();
@@ -173,23 +188,22 @@ class CHandler implements Runnable{
         
     }
     
-    private void trataCancel(){
-        System.out.println("1 - Digite o ID do server que quer cancelar");
-        System.out.println("2 - Voltar ao menu anterior");        
+    private void trataCancel() throws IOException{
+        System.out.println("---Digite o ID do server que quer cancelar---");       
         Scanner scanner = new Scanner(System.in);
-        if(scanner.nextInt() == 1){
-            out.println("cancelS" + " " + scanner);
+        int id = scanner.nextInt();
+            out.println("cancelS" + " " + id);
+            out.flush();
             String linha;
             if((linha = in.readLine()) != null){
                 if(linha.equals("sim")){
-                    System.out.println("Reserva de servidor com ID " + scanner+ " cancelada!!");
+                    System.out.println("Reserva de servidor com ID " + id + " cancelada!!");
                 }
                 else {
                     System.out.println("ID nao corresponde aos seus servidores!");
                     trataCancel();
                 }
             }
-        }
     }
     
     private void verServers() throws IOException, InterruptedException{

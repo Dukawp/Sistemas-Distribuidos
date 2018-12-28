@@ -125,7 +125,9 @@ class SHandler implements Runnable {
                                     userQ.add(divide[1], u);
                                     while( ( userQ.getUQ().get(divide[1]).contains(u) ) ){// ver qual a condiçao de paragem!!!
                                         u.condC.await();
+                                        System.out.println("ACORDEI DESNECASSARIAMENTE!!!!");
                                     }
+                                    System.out.println("RECEBI O SIGNAL");
                                     out.println("10"); // exemplo so para testar!!!!
                                 }
                             }
@@ -161,7 +163,7 @@ class SHandler implements Runnable {
                             l.lock();
                             meuS = contas.getUtilizadores().get(nome).getMeuServers();
                             for(Servidor s : meuS.values()){
-                                out.println(s.getID() + s.getServerName());
+                                out.println(s.getID() +" "+ s.getServerName());
                             }
                             out.println("termina");
                             out.flush();
@@ -172,8 +174,13 @@ class SHandler implements Runnable {
                     case "cancelS":
                         try{
                             l.lock();
-                            meuS.get(divide[1]).setDisponivel(true);
-                            contas.getUtilizadores().get(nome).getMeuServers().remove(divide[1]);
+                            //meuS = contas.getUtilizadores().get(nome).getMeuServers();
+                            System.out.println(divide[1]);
+                            int id = Integer.parseInt(divide[1]);
+                            meuS.get(id).setDisponivel(true);
+                            contas.getUtilizadores().get(nome).getMeuServers().remove(id);
+                            out.println("sim");
+                            out.flush();
                             //basta fazer remove da queue e a queue é que da o signal ao user...
                         }finally{
                             l.unlock();

@@ -38,6 +38,7 @@ public class UserQueue {
         aux = tqueue.get(servername);  
         aux.add(user);
         tqueue.put(servername,aux);   
+        System.out.println("USER ADICIONADO A QUEUE!!!");
         }finally{
             l.unlock();
         }
@@ -48,7 +49,9 @@ public class UserQueue {
             l.lock();
             Utilizador u = tqueue.get(servername).get(0);
             tqueue.get(servername).remove(0);
+            System.out.println("REMOVIDO DA FILA DE ESPERA!!!!!!");
             u.condC.signal();
+            System.out.println("DEI O SIGNAL!!!!");
         }finally{
             l.unlock();
         }
