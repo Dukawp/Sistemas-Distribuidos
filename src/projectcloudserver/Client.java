@@ -256,7 +256,7 @@ class CHandler implements Runnable{
                     out.flush();
                     if((linha = in.readLine()) != null){
                         if(linha.equals("-1")){
-                            System.out.println("Sem servidores disponveis");
+                            System.out.println("---Sem servidores disponveis---");
                             System.out.println("Deseja ficar em fila de espera?");
                             System.out.println("1 - Sim ");
                             System.out.println("2 - Nao ");

@@ -122,7 +122,9 @@ class SHandler implements Runnable {
                                 if(linha.equals("sim")){
                                     //COLOCAR USER EM FILA DE ESPERA -- UTILIZAR UMA QUEUE 
                                     Utilizador u = contas.getUtilizadores().get(nome);
+                                    System.out.println("USER !!!! " + u.getUsername() );
                                     userQ.add(divide[1], u);
+                                    System.out.println("User adicionado a lista ");
                                     while( ( userQ.getUQ().get(divide[1]).contains(u) ) ){// ver qual a condiçao de paragem!!!
                                         u.condC.await();
                                         System.out.println("ACORDEI DESNECASSARIAMENTE!!!!");
@@ -178,10 +180,16 @@ class SHandler implements Runnable {
                             System.out.println(divide[1]);
                             int id = Integer.parseInt(divide[1]);
                             meuS.get(id).setDisponivel(true);
+                            String sname = meuS.get(id).getServerName();
+                            System.out.println("Consegui ver o server " + sname);
                             contas.getUtilizadores().get(nome).getMeuServers().remove(id);
+                            System.out.println("Ja removi da minha lista...");
+                            //basta fazer remove da queue e a queue é que da o signal ao user...
+                            userQ.remove(sname);
+                            System.out.println("USEI O REMOVE");
                             out.println("sim");
                             out.flush();
-                            //basta fazer remove da queue e a queue é que da o signal ao user...
+                            
                         }finally{
                             l.unlock();
                         }

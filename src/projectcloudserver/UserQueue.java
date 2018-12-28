@@ -35,7 +35,9 @@ public class UserQueue {
         try{
         l.lock();
         ArrayList<Utilizador> aux = new ArrayList<>();
-        aux = tqueue.get(servername);  
+        if(tqueue.containsKey(servername)){
+            aux = tqueue.get(servername);  
+        }
         aux.add(user);
         tqueue.put(servername,aux);   
         System.out.println("USER ADICIONADO A QUEUE!!!");
@@ -47,11 +49,18 @@ public class UserQueue {
     public void remove(String servername){
         try{
             l.lock();
-            Utilizador u = tqueue.get(servername).get(0);
-            tqueue.get(servername).remove(0);
-            System.out.println("REMOVIDO DA FILA DE ESPERA!!!!!!");
-            u.condC.signal();
-            System.out.println("DEI O SIGNAL!!!!");
+            System.out.println("ENTREI NO REMOVE!!!!!!!!!!");
+            if(tqueue.containsKey(servername)){
+                Utilizador u = tqueue.get(servername).get(0);
+                System.out.println("USER " +u.getUsername());
+                tqueue.get(servername).remove(0);
+                System.out.println("REMOVIDO DA FILA DE ESPERA!!!!!!");
+                u.condC.signal();
+                System.out.println("DEI O SIGNAL!!!!");
+            }
+            else{
+                System.out.println("NAO HA NINGUEM EM FILA DE ESPERA!!!");
+            }
         }finally{
             l.unlock();
         }
