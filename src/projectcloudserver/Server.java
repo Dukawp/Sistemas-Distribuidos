@@ -118,15 +118,17 @@ class SHandler implements Runnable {
                                 String linha = in.readLine();
                                 if(linha.equals("sim")){
                                     //COLOCAR USER EM FILA DE ESPERA -- UTILIZAR UMA QUEUE 
-                                    //while( !condicao){
-                                      //  condicao.await();
-                                    //}
-                                    // condintion await!!
+                                    Utilizador u = contas.getUtilizadores().get(nome);
+                                    while( contas.getUtilizadores().containsKey(nome) ){// ver qual a condiçao de paragem!!!
+                                        u.condC.await();
+                                    }
                                     out.println("10"); // exemplo so para testar!!!!
                                 }
                             }
                             out.flush();
-                        }finally{
+                        } catch (InterruptedException ex) {
+                    Logger.getLogger(SHandler.class.getName()).log(Level.SEVERE, null, ex);
+                }finally{
                             l.unlock();
                         }
                     break;

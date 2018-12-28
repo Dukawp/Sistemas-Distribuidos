@@ -33,15 +33,24 @@ public class UserQueue {
     }
     
     public void add(String servername, String username){
+        try{
         l.lock();
         ArrayList<String> aux = new ArrayList<>();
         aux = queue.get(servername);  
         aux.add(username);
-        put(servername,aux);        
+        put(servername,aux);   
+        }finally{
+            l.unlock();
+        }
     }
 
-    public void remove(){
-        l.lock();
+    public void remove(String servername){
+        try{
+            l.lock();
+            
+        }finally{
+            l.unlock();
+        }
         
        
     }

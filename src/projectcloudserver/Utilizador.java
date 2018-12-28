@@ -8,6 +8,7 @@ package projectcloudserver;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.locks.Condition;
 
 
 /**
@@ -20,6 +21,7 @@ public class Utilizador {
     private String password;
     private boolean logged;//true->login efetuado;false->logout efetuado
     private Map<Integer,Servidor> meuServers;
+    public Condition condC;
 
 
     public Utilizador(String username, String password, boolean log) {

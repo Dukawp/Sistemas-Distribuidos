@@ -31,7 +31,6 @@ class CHandler implements Runnable{
     private final BufferedReader in;
     private final PrintWriter out;
     private final ReentrantLock l;
-    private Condition aguardaH;
 
     public CHandler(Socket cs) throws IOException {
         this.cs = cs;
