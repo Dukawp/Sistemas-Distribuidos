@@ -103,42 +103,6 @@ class SHandler implements Runnable {
                         }finally{
                             l.unlock();
                         }
-                    break;       
-                    
-                    case "res": //Reserva Server
-                        try{
-                            l.lock();
-                            i = servidores.efetuaReserva(divide[1]);
-                            if( i >= 0){
-                                Servidor s = servidores.getServidores().get(i);
-                                System.out.println("Servidor com id "+s.getID() );
-                                contas.getUtilizadores().get(nome).getMeuServers().put(i,s);
-                                out.println(s.getID());
-                            }
-                            else{
-                                out.println("-1");
-                                out.flush();
-                                String linha = in.readLine();
-                                if(linha.equals("sim")){
-                                    //COLOCAR USER EM FILA DE ESPERA -- UTILIZAR UMA QUEUE 
-                                    Utilizador u = contas.getUtilizadores().get(nome);
-                                    System.out.println("USER !!!! " + u.getUsername() );
-                                    userQ.add(divide[1], u);
-                                    System.out.println("User adicionado a lista ");
-                                    while( ( userQ.getUQ().get(divide[1]).contains(u) ) ){// ver qual a condiçao de paragem!!!
-                                        u.condC.await();
-                                        System.out.println("ACORDEI DESNECASSARIAMENTE!!!!");
-                                    }
-                                    System.out.println("RECEBI O SIGNAL");
-                                    out.println("10"); // exemplo so para testar!!!!
-                                }
-                            }
-                            out.flush();
-                        } catch (InterruptedException ex) {
-                    Logger.getLogger(SHandler.class.getName()).log(Level.SEVERE, null, ex);
-                }finally{
-                            l.unlock();
-                        }
                     break;
                         
                     case"logi": // Login
@@ -173,6 +137,51 @@ class SHandler implements Runnable {
                             l.unlock();
                         }
                     break;
+                    
+                    case "res": //Reserva Server
+                        try{
+                            l.lock();
+                            i = servidores.efetuaReserva(divide[1]);
+                            if( i >= 0){
+                                Servidor s = servidores.getServidores().get(i);
+                                System.out.println("Servidor com id "+s.getID() );
+                                contas.getUtilizadores().get(nome).getMeuServers().put(i,s);
+                                out.println(s.getID());
+                            }
+                            else{
+                                out.println("-1");
+                                out.flush();
+                                String linha = in.readLine();
+                                if(linha.equals("sim")){
+                                    //COLOCAR USER EM FILA DE ESPERA -- UTILIZAR UMA QUEUE 
+                                    Utilizador u = contas.getUtilizadores().get(nome);
+                                    userQ.add(divide[1], u);
+                                    out.println(userQ.getUQ().get(divide[1]).size());
+                                    out.flush();
+                                    while( ( userQ.getUQ().get(divide[1]).contains(u) ) ){// ver qual a condiçao de paragem!!!
+                                        System.out.println("Vou ficar a espera do signal!!!!!");
+                                        try{
+                                            u.l.lock();
+                                            u.condC.await();
+                                        }finally{
+                                            u.l.unlock();
+                                        }
+                                    }
+                                    i = servidores.efetuaReserva(divide[1]);
+                                    Servidor s = servidores.getServidores().get(i);
+                                    System.out.println("Servidor com id "+s.getID() );
+                                    contas.getUtilizadores().get(nome).getMeuServers().put(i,s);
+                                    out.println(s.getID());
+                                }
+                            }
+                            out.flush();
+                            } catch (InterruptedException ex) {
+                                Logger.getLogger(SHandler.class.getName()).log(Level.SEVERE, null, ex);
+                            }finally{
+                                l.unlock();
+                            }
+                    break;
+                    
                     case "cancelS":
                         try{
                             l.lock();
@@ -184,8 +193,15 @@ class SHandler implements Runnable {
                             System.out.println("Consegui ver o server " + sname);
                             contas.getUtilizadores().get(nome).getMeuServers().remove(id);
                             System.out.println("Ja removi da minha lista...");
-                            //basta fazer remove da queue e a queue é que da o signal ao user...
-                            userQ.remove(sname);
+                            nome = userQ.remove(sname);
+                            System.out.println("VAI DAR SIGNAL!!!!");
+                            Utilizador u = contas.getUtilizadores().get(nome);
+                            try{
+                                u.l.lock();
+                                u.condC.signal();
+                            }finally{
+                                u.l.unlock();
+                            }
                             System.out.println("USEI O REMOVE");
                             out.println("sim");
                             out.flush();
