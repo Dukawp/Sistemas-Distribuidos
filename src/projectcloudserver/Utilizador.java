@@ -24,6 +24,7 @@ public class Utilizador {
     private Map<Integer,Servidor> meuServers;
     final ReentrantLock l;
     public Condition condC;
+    private double custototal;
 
 
     public Utilizador(String username, String password, boolean log) {
@@ -33,6 +34,7 @@ public class Utilizador {
         this.l = new ReentrantLock();
         this.condC = l.newCondition();
         this.meuServers = new HashMap<>();
+        this.custototal = 0;
     }
 
      public Map<Integer,Servidor> getMeuServers(){
@@ -51,6 +53,13 @@ public class Utilizador {
         return username;
     }
 
+    public double getCustoTotal(){
+        return this.custototal;
+    }
+    
+    public void setCustoTotal(double custo){
+        this.custototal += custo;
+    }
   
     public void setPassword(String password) {
         this.password = password;

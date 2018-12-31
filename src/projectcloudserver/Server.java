@@ -145,6 +145,8 @@ class SHandler implements Runnable {
                             if( i >= 0){
                                 Servidor s = servidores.getServidores().get(i);
                                 System.out.println("Servidor com id "+s.getID() );
+                                servidores.getServidores().get(i).setTempoInicial();
+                                System.out.println("tempo inicial a começar em -> " +(s.setTempoInicial()/1000) /60);
                                 contas.getUtilizadores().get(nome).getMeuServers().put(i,s);
                                 out.println(s.getID());
                             }
@@ -170,6 +172,7 @@ class SHandler implements Runnable {
                                     i = servidores.efetuaReserva(divide[1]);
                                     Servidor s = servidores.getServidores().get(i);
                                     System.out.println("Servidor com id "+s.getID() );
+                                    servidores.getServidores().get(i).setTempoInicial();
                                     contas.getUtilizadores().get(nome).getMeuServers().put(i,s);
                                     out.println(s.getID());
                                 }
@@ -188,29 +191,42 @@ class SHandler implements Runnable {
                             //meuS = contas.getUtilizadores().get(nome).getMeuServers();
                             System.out.println(divide[1]);
                             int id = Integer.parseInt(divide[1]);
-                            meuS.get(id).setDisponivel(true);
+                            servidores.getServidores().get(id).setDisponivel(true);
+                            double total = servidores.getServidores().get(id).getTempo();
+                            double preco = meuS.get(id).getPreco();
                             String sname = meuS.get(id).getServerName();
                             System.out.println("Consegui ver o server " + sname);
                             contas.getUtilizadores().get(nome).getMeuServers().remove(id);
-                            System.out.println("Ja removi da minha lista...");
                             nome = userQ.remove(sname);
-                            System.out.println("VAI DAR SIGNAL!!!!");
-                            Utilizador u = contas.getUtilizadores().get(nome);
-                            try{
-                                u.l.lock();
-                                u.condC.signal();
-                            }finally{
-                                u.l.unlock();
+                            if(contas.getUtilizadores().containsKey(nome)){
+                                Utilizador u = contas.getUtilizadores().get(nome);
+                                try{
+                                    u.l.lock();
+                                    u.condC.signal();
+                                }finally{
+                                    u.l.unlock();
+                                }
                             }
-                            System.out.println("USEI O REMOVE");
-                            out.println("sim");
+                            System.out.println("Total de tempo -> "+total+" e preco de server -> "+preco);
+                            out.println(total +" "+preco);
                             out.flush();
-                            
                         }finally{
                             l.unlock();
                         }
                     break;
                     
+                    case "div":
+                        int sum = 0;
+                        meuS = contas.getUtilizadores().get(nome).getMeuServers();
+                        for(Servidor s : meuS.values()){
+                            System.out.println(s.geTempoTotal());
+                            sum += (s.geTempoTotal() * s.getPreco());
+                            System.out.println(sum);
+                        }
+                        contas.getUtilizadores().get(nome).setCustoTotal(sum);
+                        out.println(sum);
+                        out.flush();
+                    break;
                     case "lo":
                         try{
                             l.lock();

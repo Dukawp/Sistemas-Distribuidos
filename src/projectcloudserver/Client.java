@@ -174,7 +174,11 @@ class CHandler implements Runnable{
                     }
                 break;
                 case 2 :
-                    //ASDASDASDASDASD
+                    out.println("div");
+                    out.flush();
+                    if((linha = in.readLine()) != null){
+                        System.out.println("Total em divida -> " + linha);
+                    }
                 break;
                 case 0 :
                     displayMenuLogged();
@@ -195,14 +199,17 @@ class CHandler implements Runnable{
             out.println("cancelS" + " " + id);
             out.flush();
             String linha;
+            String[] divide;
             if((linha = in.readLine()) != null){
-                if(linha.equals("sim")){
-                    System.out.println("Reserva de servidor com ID " + id + " cancelada!!");
+                /*divide = linha.split(" ");       VER QUAL É O ERRO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
+                if(Integer.parseInt(divide[0])> 0){
+                    System.out.println("Reserva de servidor com ID " + id + " cancelada!! Total a pagar -> "+ (Integer.parseInt(divide[0]))*(Integer.parseInt(divide[1])));
                 }
                 else {
                     System.out.println("ID nao corresponde aos seus servidores!");
                     trataCancel();
-                }
+                }*/
+                System.out.println("************ " + linha);
             }
     }
     

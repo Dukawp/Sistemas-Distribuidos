@@ -12,10 +12,11 @@ package projectcloudserver;
 public class Servidor {
     
     private final String servername;
-    private final double preco; //preç´o é fixo!
+    private final double preco; //preço é fixo!
     private final int id;
     private boolean disponivel;
     private boolean leilao;
+    private long tempoRes;
     
     
     public Servidor(String servername, double preco, int id){
@@ -24,6 +25,7 @@ public class Servidor {
         this.id = id;
         this.disponivel = true;
         this.leilao = false;
+        this.tempoRes = 0;
     }
     
     public boolean getDisponivel(){
@@ -44,6 +46,18 @@ public class Servidor {
     
     public int getID(){
         return this.id;
+    }
+    
+    public long getTempo(){
+        return this.tempoRes;
+    }
+    
+    public long geTempoTotal(){
+        return ((System.currentTimeMillis() - tempoRes) / (60 * 1000)); 
+    }
+    
+    public long setTempoInicial(){
+        return this.tempoRes = System.currentTimeMillis(); 
     }
     
     public void setDisponivel(boolean disponivel){
