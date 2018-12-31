@@ -35,6 +35,7 @@ public class Servidores {
             if(s.getServerName().equals(tipo) && s.getDisponivel()){
                 r = s.getID();
                 s.setDisponivel(false);
+                s.setTempoInicial();
             }
         } finally {
             l.unlock();

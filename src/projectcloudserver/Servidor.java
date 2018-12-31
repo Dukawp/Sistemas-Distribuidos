@@ -16,7 +16,7 @@ public class Servidor {
     private final int id;
     private boolean disponivel;
     private boolean leilao;
-    private long tempoRes;
+    private double tempoRes;
     
     
     public Servidor(String servername, double preco, int id){
@@ -48,16 +48,16 @@ public class Servidor {
         return this.id;
     }
     
-    public long getTempo(){
+    public double getTempo(){
         return this.tempoRes;
     }
     
-    public long geTempoTotal(){
-        return ((System.currentTimeMillis() - tempoRes) / (60 * 1000)); 
+    public double geTempoTotal(){
+        return ((System.currentTimeMillis() - this.tempoRes) / (60 * 1000)); 
     }
     
-    public long setTempoInicial(){
-        return this.tempoRes = System.currentTimeMillis(); 
+    public void setTempoInicial(){
+        this.tempoRes = System.currentTimeMillis(); 
     }
     
     public void setDisponivel(boolean disponivel){

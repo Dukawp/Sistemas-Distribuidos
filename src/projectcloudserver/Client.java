@@ -288,7 +288,7 @@ class CHandler implements Runnable{
                             
                         }
                         else{
-                            System.out.println("Servidor com ID " + linha+ "reservado!");
+                            System.out.println("Servidor com ID " + linha+ " reservado!");
                             displayMenuLogged();
                         }
                     }

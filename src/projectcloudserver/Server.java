@@ -145,8 +145,6 @@ class SHandler implements Runnable {
                             if( i >= 0){
                                 Servidor s = servidores.getServidores().get(i);
                                 System.out.println("Servidor com id "+s.getID() );
-                                servidores.getServidores().get(i).setTempoInicial();
-                                System.out.println("tempo inicial a começar em -> " +(s.setTempoInicial()/1000) /60);
                                 contas.getUtilizadores().get(nome).getMeuServers().put(i,s);
                                 out.println(s.getID());
                             }
@@ -172,7 +170,6 @@ class SHandler implements Runnable {
                                     i = servidores.efetuaReserva(divide[1]);
                                     Servidor s = servidores.getServidores().get(i);
                                     System.out.println("Servidor com id "+s.getID() );
-                                    servidores.getServidores().get(i).setTempoInicial();
                                     contas.getUtilizadores().get(nome).getMeuServers().put(i,s);
                                     out.println(s.getID());
                                 }
@@ -216,7 +213,7 @@ class SHandler implements Runnable {
                     break;
                     
                     case "div":
-                        int sum = 0;
+                        double sum = 0;
                         meuS = contas.getUtilizadores().get(nome).getMeuServers();
                         for(Servidor s : meuS.values()){
                             System.out.println(s.geTempoTotal());
