@@ -1,3 +1,0 @@
-CWriter
-Client
-CReader

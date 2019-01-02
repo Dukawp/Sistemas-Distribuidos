@@ -5,6 +5,9 @@
  */
 package projectcloudserver;
 
+import java.util.Date;
+import java.util.concurrent.locks.ReentrantLock;
+
 /**
  *
  * @author Duka_
@@ -17,6 +20,8 @@ public class Servidor {
     private boolean disponivel;
     private boolean leilao;
     private double tempoRes;
+    private Date dataf;
+    private double valorL;
     
     
     public Servidor(String servername, double preco, int id){
@@ -26,6 +31,16 @@ public class Servidor {
         this.disponivel = true;
         this.leilao = false;
         this.tempoRes = 0;
+    }
+    
+    public Servidor(String servername, double preco, int id,double valor,Date df){
+        this.servername = servername;
+        this.preco = preco;
+        this.id = id;
+        this.disponivel = true;
+        this.leilao = true;
+        this.valorL = valor;
+        this.dataf = df;
     }
     
     public boolean getDisponivel(){
@@ -66,6 +81,26 @@ public class Servidor {
     
     public void setLeilao(boolean leilao){
         this.leilao = leilao;
+    }
+    
+    public double getValorL() {
+        return valorL;
+    }
+
+    public void setValorL(double valorL) {
+        this.valorL = valorL;
+    }
+    
+    public void addValorL() {
+        this.valorL = this.getValorL() + 0.05;
+    }
+
+    public Date getDataf() {
+        return dataf;
+    }
+
+    public void setDataf(Date dataf) {
+        this.dataf = dataf;
     }
    
 }

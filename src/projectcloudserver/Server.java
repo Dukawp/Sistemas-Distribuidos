@@ -11,7 +11,11 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
@@ -35,6 +39,7 @@ class SHandler implements Runnable {
     private final PrintWriter out;
     private String nome;
     private final Condition condS;
+    private HashMap<Integer,List<Utilizador>> leiloes = new HashMap();
 
     
     public SHandler(Socket cs, Contas contas,Servidores servidores, UserQueue userQ) throws IOException{
@@ -47,6 +52,7 @@ class SHandler implements Runnable {
         this.nome = null;
         this.l = new ReentrantLock();
         this.condS = l.newCondition();
+        this.leiloes = new HashMap();
     }
     
     @Override
@@ -233,13 +239,68 @@ class SHandler implements Runnable {
                             l.unlock();
                         }
                     break;
-                    //default :
+                    case "auct":
+                        try {
+                            l.lock();
+                            int flag = 0;
+                            HashMap<Integer,Servidor> aux = servidores.getLeiloes();
+                            for(Servidor a : aux.values()){
+                                if(a.getServerName().equals(divide[1])){
+                                out.println(a.getID());
+                                out.println("Tipo -> " + divide[1]);
+                                out.println("Valor -> " + a.getValorL());
+                                out.println("termina -> "+a.getDataf());
+                                flag++;
+                                out.println("termina");
+                                out.flush();
+                            }
+                        }
+                            if(flag==0){
+                                    out.println("-1");
+                                    out.flush();
+                                }
+                            
+                        }finally {
+                            l.unlock();
+                        }
+                        break;
+                        
+                    case "lic":
+                        try {
+                            l.lock();
+                            int id = Integer.parseInt(divide[1]);
+                            if(!leiloes.containsKey(id)){
+                                List<Utilizador> aux = new ArrayList();
+                                leiloes.put(id,aux);
+                            }
+                            Utilizador u = contas.getUtilizadores().get(nome);
+                            leiloes.get(id).add(u);
+                            servidores.getServidores().get(id).addValorL();
+                            /*regista licitacao*/
+                            while((servidores.getServidores().get(id).getDisponivel()) && (Calendar.getInstance().getTime().compareTo(servidores.getServidores().get(id).getDataf()) <= 0)) {
+                                try {
+                                    u.l.lock();
+                                    out.println(id+nome);                              
+                                    u.condC.await();
+                                }
+                             finally {
+                                    u.l.unlock();
+                                }
+                            }
+                        } catch (InterruptedException ex) {
+                    Logger.getLogger(SHandler.class.getName()).log(Level.SEVERE, null, ex);
+                        }finally {
+                            l.unlock();
+                        } 
+                    
+                    //default : //FAZER QUALQUER CENA
                 }
             }
                 
         } catch (IOException ei) {
             Logger.getLogger(SHandler.class.getName()).log(Level.SEVERE, null, ei);
         }
+        
     }
     
 }
@@ -262,7 +323,10 @@ public class Server {
         c.registaUser("d", "d");
         
         Servidor s = new Servidor("m5", 0.99, 1);
+        Date df =  new Date(2019,1,3,19,30,40);
+        Servidor s1 = new Servidor("m5",0.99,2,0.89,df);
         v.getServidores().put(1, s);
+        v.getServidores().put(2,s1);
         
         while(true){
             Socket cs = ss.accept();
@@ -273,7 +337,5 @@ public class Server {
             
             ts.start();
         }
-            
-        }
+    }
 }
-    
