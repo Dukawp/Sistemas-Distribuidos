@@ -381,6 +381,7 @@ class CHandler implements Runnable{
                                     break;
                                 case 2 : 
                                     displayMenuLogged();
+                                    break;
                                 default :
                                     System.out.println("Opçao invalida....");
                             }
@@ -403,7 +404,7 @@ class CHandler implements Runnable{
                     break;
                 
                 case 0 :
-                    verLeilao(id);
+                    displayLeiloes();
                     break;
                 default :
                     System.out.println("Opçao invalida....");

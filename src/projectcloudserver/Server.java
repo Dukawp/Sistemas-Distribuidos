@@ -294,7 +294,6 @@ class SHandler implements Runnable {
                         }finally {
                             l.unlock();
                         }
-                        
                         break;
                     
                     //default : //FAZER QUALQUER CENA
