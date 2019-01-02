@@ -77,7 +77,7 @@ class CHandler implements Runnable{
                     displayMenuLogged();
                     break;
                 case 2 :
-                    //tratar de ver os leiloes!!!!!
+                    displayLeiloes();
                     break;
                 case 3 :
                     trataMServers();

@@ -229,6 +229,7 @@ class SHandler implements Runnable {
                         out.println(sum);
                         out.flush();
                     break;
+                    
                     case "lo":
                         try{
                             l.lock();
@@ -239,6 +240,7 @@ class SHandler implements Runnable {
                             l.unlock();
                         }
                     break;
+                    
                     case "auct":
                         try {
                             l.lock();
@@ -291,7 +293,9 @@ class SHandler implements Runnable {
                     Logger.getLogger(SHandler.class.getName()).log(Level.SEVERE, null, ex);
                         }finally {
                             l.unlock();
-                        } 
+                        }
+                        
+                        break;
                     
                     //default : //FAZER QUALQUER CENA
                 }
