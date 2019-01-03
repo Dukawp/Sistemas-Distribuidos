@@ -24,20 +24,12 @@ class Clog {
     Queue<String> cls;
     ReentrantLock l;
     Condition vazio;
-    Condition vazioC;
-    Condition vazioH;
-    Condition vazioX;
-    List<Utilizador> equipa1;
-    List<Utilizador> equipa2;
-    Map<Integer,Utilizador> tmp;
    
     public Clog() {
         this.log = new ArrayDeque<>() ;
         this.cls = new ArrayDeque<>() ;
         this.l = new ReentrantLock();
         this.vazio = this.l.newCondition();
-        this.vazioC = this.l.newCondition();
-        this.tmp=new HashMap<>();
     }
     
     public void addS(String s){
@@ -48,24 +40,13 @@ class Clog {
         } finally {
             l.unlock();
         }
-    }
-    
-    public void addC(String s){
-        l.lock();
-        try {
-            log.add(s);
-            vazioC.signalAll();
-        } finally {
-            l.unlock();
-        }
-    }
-    
+    }    
     
     public String getLog() throws InterruptedException{
         String s;
         l.lock();
         try {
-            while(log.isEmpty()==true){vazioC.await();}
+            while(log.isEmpty()==true){vazio.await();}
             s = log.poll();
         } finally {
             l.unlock();
@@ -85,25 +66,23 @@ class Clog {
             }
     }
     
-    public void writeServer(PrintWriter out){
-        try {
+    public void writeServer(PrintWriter out) throws InterruptedException{
             
             while(true){
             
                 l.lock();
-                
-                while(log.isEmpty()){vazio.await();}
+                try {
+                    while(log.isEmpty()){vazio.await();}
                     out.println(log.poll());
                     out.flush();
-                l.unlock();
-            
-            //out.close();
-            //cs.close();
+                    //out.close();
+                    //cs.close();
+                } finally {
+                    l.unlock();
+                }
             
             }
-        } catch (InterruptedException ex) {
-            Logger.getLogger(SWriter.class.getName()).log(Level.SEVERE, null, ex);
-        }
     }
-    
 }
+    
+

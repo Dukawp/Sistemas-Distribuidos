@@ -36,8 +36,9 @@ class SHandler implements Runnable {
     private String nome;
     private final Condition condS;
     private Map<String, PrintWriter> clientOut;
+    private Clog log;
     
-    public SHandler(Socket cs, Contas contas,Servidores servidores, UserQueue userQ) throws IOException{
+    public SHandler(Socket cs, Contas contas,Servidores servidores, UserQueue userQ, Clog log) throws IOException{
         this.cs = cs;
         this.contas = contas;
         this.servidores = servidores;
@@ -48,6 +49,7 @@ class SHandler implements Runnable {
         this.l = new ReentrantLock();
         this.condS = l.newCondition();
         this.clientOut = new HashMap<>();
+        this.log = log;
     }
     
     @Override
@@ -150,6 +152,7 @@ class SHandler implements Runnable {
                                     String ntmp = s.getOwner();
                                     if(clientOut.containsKey(ntmp)){
                                         //Se mandar para um log e do outro lado so o reader é que acede ao log deve funcionar...
+                                        
                                         /*clientOut.get(ntmp).println("Reservar do seu server por leilao foi cancelada!");
                                         clientOut.get(ntmp).flush();*/
                                     }
@@ -236,7 +239,6 @@ class SHandler implements Runnable {
                         out.println(sum);
                         out.flush();
                     break;
-                    
                     case "lo":
                         try{
                             l.lock();
@@ -248,63 +250,6 @@ class SHandler implements Runnable {
                         }
                     break;
                     //default :
-                    
-                    case "auct":
-                        try {
-                            l.lock();
-                            int flag = 0;
-                            HashMap<Integer,Servidor> aux = servidores.getLeiloes();
-                            for(Servidor a : aux.values()){
-                                if(a.getServerName().equals(divide[1])){
-                                out.println(a.getID());
-                                out.println("Tipo -> " + divide[1]);
-                                out.println("Valor -> " + a.getValorL());
-                                out.println("termina -> "+a.getDataf());
-                                flag++;
-                                out.println("termina");
-                                out.flush();
-                            }
-                        }
-                            if(flag==0){
-                                    out.println("-1");
-                                    out.flush();
-                                }
-                            
-                        }finally {
-                            l.unlock();
-                        }
-                        break;
-                        
-                    case "lic":
-                        try {
-                            l.lock();
-                            int id = Integer.parseInt(divide[1]);
-                            if(!leiloes.containsKey(id)){
-                                List<Utilizador> aux = new ArrayList();
-                                leiloes.put(id,aux);
-                            }
-                            Utilizador u = contas.getUtilizadores().get(nome);
-                            leiloes.get(id).add(u);
-                            servidores.getServidores().get(id).addValorL();
-                            /*regista licitacao*/
-                            while((servidores.getServidores().get(id).getDisponivel()) && (Calendar.getInstance().getTime().compareTo(servidores.getServidores().get(id).getDataf()) <= 0)) {
-                                try {
-                                    u.l.lock();
-                                    out.println(id+nome);                              
-                                    u.condC.await();
-                                }
-                             finally {
-                                    u.l.unlock();
-                                }
-                            }
-                        } catch (InterruptedException ex) {
-                    Logger.getLogger(SHandler.class.getName()).log(Level.SEVERE, null, ex);
-                        }finally {
-                            l.unlock();
-                        }
-                        break;
-                    
-                    //default : //FAZER QUALQUER CENA
                 }
             }
                 
@@ -325,7 +270,8 @@ public class Server {
         Contas c = new Contas();
         Servidores v = new Servidores();
         UserQueue q = new UserQueue();
-         
+        Clog log = new Clog();
+        
         //contas para teste...
         c.registaUser("a", "a");
         c.registaUser("b", "b");
@@ -340,7 +286,7 @@ public class Server {
             
             System.out.println("Novo Cliente!!"); // so para ver se esta tudo direito....
             
-            Thread ts = new Thread(new SHandler(cs, c, v, q));
+            Thread ts = new Thread(new SHandler(cs, c, v, q,log));
             
             ts.start();
         }
