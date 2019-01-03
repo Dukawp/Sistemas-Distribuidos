@@ -22,6 +22,39 @@ import java.util.logging.Logger;
  * @author Duka_
  */
 
+class CReader implements Runnable{
+    
+    private final Socket cs;
+    private final BufferedReader systemIn;
+    private final BufferedReader in;
+    private final PrintWriter out;
+    private final ReentrantLock l;
+    private Clog clog;
+
+    public CReader(Socket cs, Clog clog) throws IOException {
+        this.cs = cs;
+        this.clog = clog;
+        this.out = new PrintWriter(cs.getOutputStream(), true);
+        this.systemIn = new BufferedReader(new InputStreamReader(System.in)); // pode ser substituido por System.console().readLine(); se estiver a usar consola em vez do IDE
+        this.in = new BufferedReader(new InputStreamReader(cs.getInputStream()));
+        this.l= new ReentrantLock();
+    }
+    
+
+    @Override
+    public void run() {
+        Scanner scanner = new Scanner(System.in);
+        String linha;
+        try {
+            while( (linha=in.readLine()) != null){
+                System.out.println("Client READER A LER -> " +linha);
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(CReader.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+}
+
 
 class CHandler implements Runnable{
     
@@ -330,86 +363,6 @@ class CHandler implements Runnable{
         cs.close();
         System.out.println("Logged out!! Cya");
     }
-    
-    private void displayLeiloes() throws IOException, InterruptedException {
-        System.out.println("Escolha servidor que pretende Leilão :");
-        System.out.println("1 - Ver m5...");
-        System.out.println("2 - Ver t3...");
-        System.out.println("3 - Ver a2...");
-        System.out.println("4 - Ver c1...");
-        String tipo = null;
-        Scanner scanner = new Scanner(System.in);
-            int choice  = scanner.nextInt();
-            String linha;
-            switch(choice){
-                case 1 :
-                    tipo = "m5";
-                    break;
-                case 2 :
-                    tipo = "t3";
-                    break;
-                case 3 :
-                    tipo = "a2";
-                    break;
-                case 4 :
-                    tipo = "c1";
-                    break;
-                default : 
-                    System.out.println("Opçao invalida....");
-            }
-        out.println("auct"+" "+tipo);
-        out.flush();
-        System.out.println("**********************");
-        int id;
-        linha = in.readLine();
-        if(!linha.equals("-1")) {
-            id = Integer.parseInt(linha);
-            while( ((linha = in.readLine()) != null) && !(linha.equals("termina"))){
-                System.out.println(linha);
-            } 
-        System.out.println("**********************\n");
-        verLeilao(id);
-        }
-        else { System.out.println("---Leilao indisponível---");
-                            System.out.println("Ver outro leilão?");
-                            System.out.println("1 - Sim ");
-                            System.out.println("2 - Nao ");
-                            choice  = scanner.nextInt();
-                            switch(choice){
-                                case 1 :
-                                    displayLeiloes();
-                                    break;
-                                case 2 : 
-                                    displayMenuLogged();
-                                default :
-                                    System.out.println("Opçao invalida....");
-                            }
-        }
-    }
-    
-    
-    private void verLeilao(int id) throws IOException, InterruptedException {
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("1 - Licitar servidor");
-        System.out.println("0 - Voltar ao menu anterior");
-        String linha;
-        int choice  = scanner.nextInt();
-
-        switch(choice){
-                case 1 :
-                    out.println("lic"+" "+id);
-                    linha = in.readLine();
-                    System.out.println("Código para confirmar licitação: "+linha);
-                    break;
-                
-                case 0 :
-                    verLeilao(id);
-                    break;
-                default :
-                    System.out.println("Opçao invalida....");
-                    verLeilao(id);
-        }
-    }
  
 }
 
@@ -418,12 +371,12 @@ public class Client {
     public static void main(String[] args) throws IOException{
         
         Socket cs = new Socket("127.0.0.1", 1234);
-        
+        Clog clog = new Clog();
         
         
         Thread th = new Thread(new CHandler(cs));
+        Thread tw = new Thread(new CReader(cs, clog));
         th.start();
-        
-       
+        tw.start();
     }
 }

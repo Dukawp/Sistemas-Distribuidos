@@ -5,9 +5,6 @@
  */
 package projectcloudserver;
 
-import java.util.Date;
-import java.util.concurrent.locks.ReentrantLock;
-
 /**
  *
  * @author Duka_
@@ -20,8 +17,7 @@ public class Servidor {
     private boolean disponivel;
     private boolean leilao;
     private double tempoRes;
-    private Date dataf;
-    private double valorL;
+    private String owner;
     
     
     public Servidor(String servername, double preco, int id){
@@ -31,16 +27,7 @@ public class Servidor {
         this.disponivel = true;
         this.leilao = false;
         this.tempoRes = 0;
-    }
-    
-    public Servidor(String servername, double preco, int id,double valor,Date df){
-        this.servername = servername;
-        this.preco = preco;
-        this.id = id;
-        this.disponivel = true;
-        this.leilao = true;
-        this.valorL = valor;
-        this.dataf = df;
+        this.owner = "";
     }
     
     public boolean getDisponivel(){
@@ -71,6 +58,10 @@ public class Servidor {
         return ((System.currentTimeMillis() - this.tempoRes) / (60 * 1000)); 
     }
     
+    public String getOwner(){
+        return this.owner;
+    }
+    
     public void setTempoInicial(){
         this.tempoRes = System.currentTimeMillis(); 
     }
@@ -83,24 +74,12 @@ public class Servidor {
         this.leilao = leilao;
     }
     
-    public double getValorL() {
-        return valorL;
-    }
-
-    public void setValorL(double valorL) {
-        this.valorL = valorL;
+    public void setOwner(String owner){
+        this.owner = owner;
     }
     
-    public void addValorL() {
-        this.valorL = this.getValorL() + 0.05;
-    }
-
-    public Date getDataf() {
-        return dataf;
-    }
-
-    public void setDataf(Date dataf) {
-        this.dataf = dataf;
+    public void setNoOwner(){
+        this.owner = "";
     }
    
 }

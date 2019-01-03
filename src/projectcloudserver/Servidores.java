@@ -32,9 +32,10 @@ public class Servidores {
         int r = -1 ;
         try {
             for(Servidor s : servidores.values())// FALTA TRATAR NO CASO DO SERVER ESTAR EM LEILAO!!!!
-            if(s.getServerName().equals(tipo) && s.getDisponivel()){
+            if(s.getServerName().equals(tipo) && (s.getDisponivel() || s.getLeilao())){
                 r = s.getID();
                 s.setDisponivel(false);
+                s.setTempoInicial();
             }
         } finally {
             l.unlock();
@@ -59,23 +60,4 @@ public class Servidores {
         return r;  
     }
     
-        public HashMap<Integer,Servidor> getLeiloes() {
-        HashMap<Integer,Servidor> ret = new HashMap();
-        for(Servidor a : servidores.values()) {
-            if(a.getLeilao()){
-                ret.put(a.getID(),a);
-            }
-        }
-        return ret;
-    }
-    
-            
-    public void efectuaLicitacao(int id){
-        l.lock();
-        try {
-            servidores.get(id).addValorL();
-        }finally {
-            l.unlock();
-        }       
-    }
 }

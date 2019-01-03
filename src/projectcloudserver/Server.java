@@ -11,11 +11,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
@@ -39,8 +35,7 @@ class SHandler implements Runnable {
     private final PrintWriter out;
     private String nome;
     private final Condition condS;
-    private HashMap<Integer,List<Utilizador>> leiloes = new HashMap();
-
+    private Map<String, PrintWriter> clientOut;
     
     public SHandler(Socket cs, Contas contas,Servidores servidores, UserQueue userQ) throws IOException{
         this.cs = cs;
@@ -52,7 +47,7 @@ class SHandler implements Runnable {
         this.nome = null;
         this.l = new ReentrantLock();
         this.condS = l.newCondition();
-        this.leiloes = new HashMap();
+        this.clientOut = new HashMap<>();
     }
     
     @Override
@@ -118,6 +113,7 @@ class SHandler implements Runnable {
                                 i = contas.efetuaLogin(username, divide[2]);
                                 if(i==1) {
                                     nome = username;
+                                    clientOut.put(nome, out);
                                 }
                                 out.println(i);
                                 out.flush();
@@ -150,6 +146,15 @@ class SHandler implements Runnable {
                             if( i >= 0){
                                 Servidor s = servidores.getServidores().get(i);
                                 System.out.println("Servidor com id "+s.getID() );
+                                if(s.getLeilao()){
+                                    String ntmp = s.getOwner();
+                                    if(clientOut.containsKey(ntmp)){
+                                        //Se mandar para um log e do outro lado so o reader é que acede ao log deve funcionar...
+                                        /*clientOut.get(ntmp).println("Reservar do seu server por leilao foi cancelada!");
+                                        clientOut.get(ntmp).flush();*/
+                                    }
+                                }
+                                s.setOwner(nome);
                                 contas.getUtilizadores().get(nome).getMeuServers().put(i,s);
                                 out.println(s.getID());
                             }
@@ -174,6 +179,7 @@ class SHandler implements Runnable {
                                     }
                                     i = servidores.efetuaReserva(divide[1]);
                                     Servidor s = servidores.getServidores().get(i);
+                                    s.setOwner(nome);
                                     System.out.println("Servidor com id "+s.getID() );
                                     contas.getUtilizadores().get(nome).getMeuServers().put(i,s);
                                     out.println(s.getID());
@@ -194,6 +200,7 @@ class SHandler implements Runnable {
                             System.out.println(divide[1]);
                             int id = Integer.parseInt(divide[1]);
                             servidores.getServidores().get(id).setDisponivel(true);
+                            servidores.getServidores().get(id).setNoOwner();
                             double total = servidores.getServidores().get(id).getTempo();
                             double preco = meuS.get(id).getPreco();
                             String sname = meuS.get(id).getServerName();
@@ -239,68 +246,13 @@ class SHandler implements Runnable {
                             l.unlock();
                         }
                     break;
-                    case "auct":
-                        try {
-                            l.lock();
-                            int flag = 0;
-                            HashMap<Integer,Servidor> aux = servidores.getLeiloes();
-                            for(Servidor a : aux.values()){
-                                if(a.getServerName().equals(divide[1])){
-                                out.println(a.getID());
-                                out.println("Tipo -> " + divide[1]);
-                                out.println("Valor -> " + a.getValorL());
-                                out.println("termina -> "+a.getDataf());
-                                flag++;
-                                out.println("termina");
-                                out.flush();
-                            }
-                        }
-                            if(flag==0){
-                                    out.println("-1");
-                                    out.flush();
-                                }
-                            
-                        }finally {
-                            l.unlock();
-                        }
-                        break;
-                        
-                    case "lic":
-                        try {
-                            l.lock();
-                            int id = Integer.parseInt(divide[1]);
-                            if(!leiloes.containsKey(id)){
-                                List<Utilizador> aux = new ArrayList();
-                                leiloes.put(id,aux);
-                            }
-                            Utilizador u = contas.getUtilizadores().get(nome);
-                            leiloes.get(id).add(u);
-                            servidores.getServidores().get(id).addValorL();
-                            /*regista licitacao*/
-                            while((servidores.getServidores().get(id).getDisponivel()) && (Calendar.getInstance().getTime().compareTo(servidores.getServidores().get(id).getDataf()) <= 0)) {
-                                try {
-                                    u.l.lock();
-                                    out.println(id+nome);                              
-                                    u.condC.await();
-                                }
-                             finally {
-                                    u.l.unlock();
-                                }
-                            }
-                        } catch (InterruptedException ex) {
-                    Logger.getLogger(SHandler.class.getName()).log(Level.SEVERE, null, ex);
-                        }finally {
-                            l.unlock();
-                        } 
-                    
-                    //default : //FAZER QUALQUER CENA
+                    //default :
                 }
             }
                 
         } catch (IOException ei) {
             Logger.getLogger(SHandler.class.getName()).log(Level.SEVERE, null, ei);
         }
-        
     }
     
 }
@@ -323,10 +275,7 @@ public class Server {
         c.registaUser("d", "d");
         
         Servidor s = new Servidor("m5", 0.99, 1);
-        Date df =  new Date(2019,1,3,19,30,40);
-        Servidor s1 = new Servidor("m5",0.99,2,0.89,df);
         v.getServidores().put(1, s);
-        v.getServidores().put(2,s1);
         
         while(true){
             Socket cs = ss.accept();
@@ -337,5 +286,7 @@ public class Server {
             
             ts.start();
         }
-    }
+            
+        }
 }
+    
