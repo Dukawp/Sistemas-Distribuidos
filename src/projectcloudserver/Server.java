@@ -236,6 +236,7 @@ class SHandler implements Runnable {
                         out.println(sum);
                         out.flush();
                     break;
+                    
                     case "lo":
                         try{
                             l.lock();
@@ -247,6 +248,63 @@ class SHandler implements Runnable {
                         }
                     break;
                     //default :
+                    
+                    case "auct":
+                        try {
+                            l.lock();
+                            int flag = 0;
+                            HashMap<Integer,Servidor> aux = servidores.getLeiloes();
+                            for(Servidor a : aux.values()){
+                                if(a.getServerName().equals(divide[1])){
+                                out.println(a.getID());
+                                out.println("Tipo -> " + divide[1]);
+                                out.println("Valor -> " + a.getValorL());
+                                out.println("termina -> "+a.getDataf());
+                                flag++;
+                                out.println("termina");
+                                out.flush();
+                            }
+                        }
+                            if(flag==0){
+                                    out.println("-1");
+                                    out.flush();
+                                }
+                            
+                        }finally {
+                            l.unlock();
+                        }
+                        break;
+                        
+                    case "lic":
+                        try {
+                            l.lock();
+                            int id = Integer.parseInt(divide[1]);
+                            if(!leiloes.containsKey(id)){
+                                List<Utilizador> aux = new ArrayList();
+                                leiloes.put(id,aux);
+                            }
+                            Utilizador u = contas.getUtilizadores().get(nome);
+                            leiloes.get(id).add(u);
+                            servidores.getServidores().get(id).addValorL();
+                            /*regista licitacao*/
+                            while((servidores.getServidores().get(id).getDisponivel()) && (Calendar.getInstance().getTime().compareTo(servidores.getServidores().get(id).getDataf()) <= 0)) {
+                                try {
+                                    u.l.lock();
+                                    out.println(id+nome);                              
+                                    u.condC.await();
+                                }
+                             finally {
+                                    u.l.unlock();
+                                }
+                            }
+                        } catch (InterruptedException ex) {
+                    Logger.getLogger(SHandler.class.getName()).log(Level.SEVERE, null, ex);
+                        }finally {
+                            l.unlock();
+                        }
+                        break;
+                    
+                    //default : //FAZER QUALQUER CENA
                 }
             }
                 
