@@ -60,4 +60,23 @@ public class Servidores {
         return r;  
     }
     
+    public HashMap<Integer,Servidor> getLeiloes() {
+        HashMap<Integer,Servidor> ret = new HashMap();
+        for(Servidor a : servidores.values()) {
+            if(a.getLeilao()){
+                ret.put(a.getID(),a);
+            }
+        }
+        return ret;
+    }
+    
+    public void efectuaLicitacao(int id){
+        l.lock();
+        try {
+            servidores.get(id).addValorL();
+        }finally {
+            l.unlock();
+        }       
+    }
+    
 }

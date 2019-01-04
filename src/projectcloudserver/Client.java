@@ -52,7 +52,8 @@ class CReader implements Runnable{
             try {
                 /*if(!(nome.equals(""))){
                 System.out.println(nome);
-                }*/
+                }
+                */
                 String message;
                 if( (message = clog.getLog(nome)) != null){
                     System.out.println("MESSAGE ---> " + message);    
@@ -63,6 +64,7 @@ class CReader implements Runnable{
         }
     }
 }
+
 
 
 class CHandler implements Runnable{
@@ -120,7 +122,7 @@ class CHandler implements Runnable{
                     displayMenuLogged();
                     break;
                 case 2 :
-                    //tratar de ver os leiloes!!!!!
+                    displayLeiloes();
                     break;
                 case 3 :
                     trataMServers();
@@ -343,6 +345,86 @@ class CHandler implements Runnable{
                     ReservarServer(tipo);
         }
         displayMenuLogged();
+    }
+    
+    private void displayLeiloes() throws IOException, InterruptedException {
+        System.out.println("Escolha servidor que pretende Leilão :");
+        System.out.println("1 - Ver m5...");
+        System.out.println("2 - Ver t3...");
+        System.out.println("3 - Ver a2...");
+        System.out.println("4 - Ver c1...");
+        String tipo = null;
+        Scanner scanner = new Scanner(System.in);
+            int choice  = scanner.nextInt();
+            String linha;
+            switch(choice){
+                case 1 :
+                    tipo = "m5";
+                    break;
+                case 2 :
+                    tipo = "t3";
+                    break;
+                case 3 :
+                    tipo = "a2";
+                    break;
+                case 4 :
+                    tipo = "c1";
+                    break;
+                default : 
+                    System.out.println("Opçao invalida....");
+            }
+        out.println("auct"+" "+tipo);
+        out.flush();
+        System.out.println("**********************");
+        int id;
+        linha = in.readLine();
+        if(!linha.equals("-1")) {
+            id = Integer.parseInt(linha);
+            while( ((linha = in.readLine()) != null) && !(linha.equals("termina"))){
+                System.out.println(linha);
+            } 
+        System.out.println("**********************\n");
+        verLeilao(id);
+        }
+        else { System.out.println("---Leilao indisponível---");
+                            System.out.println("Ver outro leilão?");
+                            System.out.println("1 - Sim ");
+                            System.out.println("2 - Nao ");
+                            choice  = scanner.nextInt();
+                            switch(choice){
+                                case 1 :
+                                    displayLeiloes();
+                                    break;
+                                case 2 : 
+                                    displayMenuLogged();
+                                default :
+                                    System.out.println("Opçao invalida....");
+                            }
+        }
+    }
+
+
+    private void verLeilao(int id) throws IOException, InterruptedException {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("1 - Licitar servidor");
+        System.out.println("0 - Voltar ao menu anterior");
+        String linha;
+        int choice  = scanner.nextInt();
+
+        switch(choice){
+                case 1 :
+                    out.println("lic"+" "+id);
+                    linha = in.readLine();
+                    System.out.println("Código para confirmar licitação: "+linha);
+                    break;
+
+                case 0 :
+                    verLeilao(id);
+                    break;
+                default :
+                    System.out.println("Opçao invalida....");
+                    verLeilao(id);
+        }
     }
     
     

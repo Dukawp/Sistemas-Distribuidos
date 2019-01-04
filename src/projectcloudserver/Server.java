@@ -11,12 +11,16 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.Date;
+
 
 /**
  *
@@ -37,6 +41,8 @@ class SHandler implements Runnable {
     private final Condition condS;
     private Map<String, PrintWriter> clientOut;
     private Clog clog;
+    private HashMap<Integer,List<Utilizador>> leiloes = new HashMap();
+
     
     public SHandler(Socket cs, Contas contas,Servidores servidores, UserQueue userQ, Clog clog) throws IOException{
         this.cs = cs;
@@ -50,6 +56,7 @@ class SHandler implements Runnable {
         this.condS = l.newCondition();
         this.clientOut = new HashMap<>();
         this.clog = clog;
+        this.leiloes = new HashMap<>();
     }
     
     @Override
@@ -148,17 +155,15 @@ class SHandler implements Runnable {
                             if( i >= 0){
                                 Servidor s = servidores.getServidores().get(i);
                                 System.out.println("Servidor com id "+s.getID() );
-                                if(s.getLeilao()){
-                                    String ntmp = s.getOwner();
-                                    if(clientOut.containsKey(ntmp)){
+                                //RETIREI AQUI ESTE IF SO PARA VER SE ESTAVA A FUNCIONAR
+                                //if(s.getLeilao()){
+                                  //  String ntmp = s.getOwner();
                                         //Se mandar para um log e do outro lado so o reader é que acede ao log deve funcionar...
-                                        clog.addS(ntmp,"ja foste!");
+                                    //    clog.addS(ntmp,"ja foste!");
                                         /*clientOut.get(ntmp).println("Reservar do seu server por leilao foi cancelada!");
                                         clientOut.get(ntmp).flush();*/
-                                    }
-                                }
+                                //}
                                 s.setOwner(nome);
-                                clog.addS(ntmp,"ja foste!");
                                 contas.getUtilizadores().get(nome).getMeuServers().put(i,s);
                                 out.println(s.getID());
                             }
@@ -189,7 +194,9 @@ class SHandler implements Runnable {
                                     out.println(s.getID());
                                 }
                             }
+                            
                             out.flush();
+                            
                             } catch (InterruptedException ex) {
                                 Logger.getLogger(SHandler.class.getName()).log(Level.SEVERE, null, ex);
                             }finally{
@@ -250,6 +257,60 @@ class SHandler implements Runnable {
                             l.unlock();
                         }
                     break;
+                    case "auct":
+                        try {
+                            l.lock();
+                            int flag = 0;
+                            HashMap<Integer,Servidor> aux = servidores.getLeiloes();
+                            for(Servidor a : aux.values()){
+                                if(a.getServerName().equals(divide[1])){
+                                out.println(a.getID());
+                                out.println("Tipo -> " + divide[1]);
+                                out.println("Valor -> " + a.getValorL());
+                                out.println("termina -> "+a.getDataf());
+                                flag++;
+                                out.println("termina");
+                                out.flush();
+                            }
+                        }
+                            if(flag==0){
+                                    out.println("-1");
+                                    out.flush();
+                                }
+
+                        }finally {
+                            l.unlock();
+                        }
+                        break;
+
+                    case "lic":
+                        try {
+                            l.lock();
+                            int id = Integer.parseInt(divide[1]);
+                            if(!leiloes.containsKey(id)){
+                                List<Utilizador> aux = new ArrayList();
+                                leiloes.put(id,aux);
+                            }
+                            Utilizador u = contas.getUtilizadores().get(nome);
+                            leiloes.get(id).add(u);
+                            servidores.getServidores().get(id).addValorL();
+                            /*regista licitacao*/
+                            while((servidores.getServidores().get(id).getDisponivel()) && (Calendar.getInstance().getTime().compareTo(servidores.getServidores().get(id).getDataf()) <= 0)) {
+                                try {
+                                    u.l.lock();
+                                    out.println(id+nome);                              
+                                    u.condC.await();
+                                }
+                             finally {
+                                    u.l.unlock();
+                                }
+                            }
+                        } catch (InterruptedException ex) {
+                        Logger.getLogger(SHandler.class.getName()).log(Level.SEVERE, null, ex);
+                        }finally {
+                            l.unlock();
+                        } 
+                        break;
                     //default :
                 }
             }
@@ -279,8 +340,13 @@ public class Server {
         c.registaUser("c", "c");
         c.registaUser("d", "d");
         
-        Servidor s = new Servidor("m5", 0.99, 1);
+        Date df =  new Date(2019,0,4,21,26,40);
+        Servidor s = new Servidor("m2", 0.99, 1,df,0.90);
+        Servidor s1 = new Servidor("m5",0.99,2,df,0.89);
+        s1.setLeilao(true);
+        s1.setOwner("b");
         v.getServidores().put(1, s);
+        v.getServidores().put(2,s1);
         
         while(true){
             Socket cs = ss.accept();

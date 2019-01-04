@@ -5,6 +5,8 @@
  */
 package projectcloudserver;
 
+import java.util.Date;
+
 /**
  *
  * @author Duka_
@@ -18,9 +20,10 @@ public class Servidor {
     private boolean leilao;
     private double tempoRes;
     private String owner;
+    private Date dataf;
+    private double valorL;
     
-    
-    public Servidor(String servername, double preco, int id){
+    public Servidor(String servername, double preco, int id, Date df, double valorL){
         this.servername = servername;
         this.preco = preco;
         this.id = id;
@@ -28,6 +31,28 @@ public class Servidor {
         this.leilao = false;
         this.tempoRes = 0;
         this.owner = "";
+        this.dataf = df;
+        this.valorL = valorL;
+    }
+    
+    public double getValorL() {
+        return valorL;
+    }
+
+    public void setValorL(double valorL) {
+        this.valorL = valorL;
+    }
+
+    public void addValorL() {
+        this.valorL = this.getValorL() + 0.05;
+    }
+
+    public Date getDataf() {
+        return dataf;
+    }
+
+    public void setDataf(Date dataf) {
+        this.dataf = dataf;
     }
     
     public boolean getDisponivel(){
