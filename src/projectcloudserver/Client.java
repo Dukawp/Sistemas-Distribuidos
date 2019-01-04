@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.Scanner;
+import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -25,10 +26,12 @@ import java.util.logging.Logger;
 class CReader implements Runnable{
     
     private final Socket cs;
+    private String nome;
     private final BufferedReader systemIn;
     private final BufferedReader in;
     private final PrintWriter out;
     private final ReentrantLock l;
+    private Condition cond;
     private Clog clog;
 
     public CReader(Socket cs, Clog clog) throws IOException {
@@ -38,19 +41,25 @@ class CReader implements Runnable{
         this.systemIn = new BufferedReader(new InputStreamReader(System.in)); // pode ser substituido por System.console().readLine(); se estiver a usar consola em vez do IDE
         this.in = new BufferedReader(new InputStreamReader(cs.getInputStream()));
         this.l= new ReentrantLock();
+        this.cond = l.newCondition();
     }
     
 
     @Override
     public void run() {
-        Scanner scanner = new Scanner(System.in);
-        String linha;
-        try {
-            while( (linha=in.readLine()) != null){
-                System.out.println("Client READER A LER -> " +linha);
+        
+        while( true ){
+            try {
+                /*if(!(nome.equals(""))){
+                System.out.println(nome);
+                }*/
+                String message;
+                if( (message = clog.getLog(nome)) != null){
+                    System.out.println("MESSAGE ---> " + message);    
+                }
+            } catch (InterruptedException ex) {
+                Logger.getLogger(CReader.class.getName()).log(Level.SEVERE, null, ex);
             }
-        } catch (IOException ex) {
-            Logger.getLogger(CReader.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 }
@@ -59,6 +68,7 @@ class CReader implements Runnable{
 class CHandler implements Runnable{
     
     private final Socket cs;
+    private String nome;
     private final BufferedReader systemIn;
     private final BufferedReader in;
     private final PrintWriter out;
@@ -350,6 +360,7 @@ class CHandler implements Runnable{
         System.out.println("Username: ");
         Scanner sc = new Scanner(System.in);
         String u = sc.nextLine();
+        nome = u;
         System.out.println("Password: ");
         String p = sc.nextLine();
         out.println("logi"+" "+u+" "+p);
@@ -372,7 +383,7 @@ public class Client {
         
         Socket cs = new Socket("127.0.0.1", 1234);
         Clog clog = new Clog();
-        
+        String nome = "";
         
         Thread th = new Thread(new CHandler(cs));
         Thread tw = new Thread(new CReader(cs, clog));

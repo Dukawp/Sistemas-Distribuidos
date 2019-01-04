@@ -36,9 +36,9 @@ class SHandler implements Runnable {
     private String nome;
     private final Condition condS;
     private Map<String, PrintWriter> clientOut;
-    private Clog log;
+    private Clog clog;
     
-    public SHandler(Socket cs, Contas contas,Servidores servidores, UserQueue userQ, Clog log) throws IOException{
+    public SHandler(Socket cs, Contas contas,Servidores servidores, UserQueue userQ, Clog clog) throws IOException{
         this.cs = cs;
         this.contas = contas;
         this.servidores = servidores;
@@ -49,7 +49,7 @@ class SHandler implements Runnable {
         this.l = new ReentrantLock();
         this.condS = l.newCondition();
         this.clientOut = new HashMap<>();
-        this.log = log;
+        this.clog = clog;
     }
     
     @Override
@@ -152,12 +152,13 @@ class SHandler implements Runnable {
                                     String ntmp = s.getOwner();
                                     if(clientOut.containsKey(ntmp)){
                                         //Se mandar para um log e do outro lado so o reader é que acede ao log deve funcionar...
-                                        
+                                        clog.addS(ntmp,"ja foste!");
                                         /*clientOut.get(ntmp).println("Reservar do seu server por leilao foi cancelada!");
                                         clientOut.get(ntmp).flush();*/
                                     }
                                 }
                                 s.setOwner(nome);
+                                clog.addS(ntmp,"ja foste!");
                                 contas.getUtilizadores().get(nome).getMeuServers().put(i,s);
                                 out.println(s.getID());
                             }
@@ -270,7 +271,7 @@ public class Server {
         Contas c = new Contas();
         Servidores v = new Servidores();
         UserQueue q = new UserQueue();
-        Clog log = new Clog();
+        Clog clog = new Clog();
         
         //contas para teste...
         c.registaUser("a", "a");
@@ -286,7 +287,7 @@ public class Server {
             
             System.out.println("Novo Cliente!!"); // so para ver se esta tudo direito....
             
-            Thread ts = new Thread(new SHandler(cs, c, v, q,log));
+            Thread ts = new Thread(new SHandler(cs, c, v, q, clog));
             
             ts.start();
         }

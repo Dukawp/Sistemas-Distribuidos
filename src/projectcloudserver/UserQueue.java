@@ -18,12 +18,10 @@ public class UserQueue {
 
     private Map<String,ArrayList<Utilizador>> tqueue;  // <servername,username>
     private ReentrantLock l = new ReentrantLock();  
-    //private Condition cond = l.newCondition();
     
     public UserQueue(){
         this.tqueue = new HashMap<>();
         this.l = new ReentrantLock();
-        //this.cond = l.newCondition();
     }
     
     

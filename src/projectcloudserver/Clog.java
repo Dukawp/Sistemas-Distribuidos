@@ -6,9 +6,9 @@
 package projectcloudserver;
 
 import java.io.PrintWriter;
+import java.net.Socket;
 import java.util.ArrayDeque;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.locks.Condition;
@@ -20,34 +20,39 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 class Clog {
     
-    Queue<String> log;
-    Queue<String> cls;
+    //Queue<String> log;
     ReentrantLock l;
     Condition vazio;
+    Map<String,Queue<String>> clientlogs;
    
     public Clog() {
-        this.log = new ArrayDeque<>() ;
-        this.cls = new ArrayDeque<>() ;
+        //this.log = new ArrayDeque<>() ;
         this.l = new ReentrantLock();
         this.vazio = this.l.newCondition();
+        this.clientlogs = new HashMap<>();
     }
     
-    public void addS(String s){
+    public void addS(String nome, String s){
         l.lock();
         try {
-            log.add(s);
+            Queue<String> lg = clientlogs.get(nome);
+            lg.add(s);
+            clientlogs.put(nome, lg);
+            //log.add(s);
             vazio.signalAll(); 
         } finally {
             l.unlock();
         }
     }    
     
-    public String getLog() throws InterruptedException{
+    public String getLog(String nome) throws InterruptedException{
         String s;
         l.lock();
         try {
-            while(log.isEmpty()==true){vazio.await();}
-            s = log.poll();
+            while(clientlogs.get(nome).isEmpty()==true){
+                vazio.await();
+            }
+            s = clientlogs.get(nome).poll();
         } finally {
             l.unlock();
         }
@@ -63,24 +68,6 @@ class Clog {
                 out.flush();
             } finally {
                 l.unlock();
-            }
-    }
-    
-    public void writeServer(PrintWriter out) throws InterruptedException{
-            
-            while(true){
-            
-                l.lock();
-                try {
-                    while(log.isEmpty()){vazio.await();}
-                    out.println(log.poll());
-                    out.flush();
-                    //out.close();
-                    //cs.close();
-                } finally {
-                    l.unlock();
-                }
-            
             }
     }
 }
