@@ -5,7 +5,9 @@
  */
 package projectcloudserver;
 
+import java.time.LocalDateTime;
 import java.util.Date;
+import java.time.Duration;
 
 /**
  *
@@ -18,7 +20,7 @@ public class Servidor {
     private final int id;
     private boolean disponivel;
     private boolean leilao;
-    private double tempoRes;
+    private LocalDateTime tempoRes;
     private String owner;
     private Date dataf;
     private double valorL;
@@ -29,7 +31,7 @@ public class Servidor {
         this.id = id;
         this.disponivel = true;
         this.leilao = false;
-        this.tempoRes = 0;
+        this.tempoRes = LocalDateTime.now();
         this.owner = "";
         this.dataf = df;
         this.valorL = valorL;
@@ -75,12 +77,12 @@ public class Servidor {
         return this.id;
     }
     
-    public double getTempo(){
+    public LocalDateTime getTempo(){
         return this.tempoRes;
     }
     
-    public double geTempoTotal(){
-        return ((System.currentTimeMillis() - this.tempoRes) / (60 * 1000)); 
+    public long geTempoTotal(){
+        return ((Duration.between(this.tempoRes,LocalDateTime.now())).toMinutes());
     }
     
     public String getOwner(){
@@ -88,7 +90,7 @@ public class Servidor {
     }
     
     public void setTempoInicial(){
-        this.tempoRes = System.currentTimeMillis(); 
+        this.tempoRes = LocalDateTime.now(); 
     }
     
     public void setDisponivel(boolean disponivel){

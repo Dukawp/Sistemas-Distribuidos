@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,6 +21,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.Date;
+
 
 
 /**
@@ -40,11 +42,10 @@ class SHandler implements Runnable {
     private String nome;
     private final Condition condS;
     private Map<String, PrintWriter> clientOut;
-    private Clog clog;
     private HashMap<Integer,List<Utilizador>> leiloes = new HashMap();
 
     
-    public SHandler(Socket cs, Contas contas,Servidores servidores, UserQueue userQ, Clog clog) throws IOException{
+    public SHandler(Socket cs, Contas contas,Servidores servidores, UserQueue userQ) throws IOException{
         this.cs = cs;
         this.contas = contas;
         this.servidores = servidores;
@@ -55,7 +56,6 @@ class SHandler implements Runnable {
         this.l = new ReentrantLock();
         this.condS = l.newCondition();
         this.clientOut = new HashMap<>();
-        this.clog = clog;
         this.leiloes = new HashMap<>();
     }
     
@@ -212,11 +212,12 @@ class SHandler implements Runnable {
                             int id = Integer.parseInt(divide[1]);
                             servidores.getServidores().get(id).setDisponivel(true);
                             servidores.getServidores().get(id).setNoOwner();
-                            double total = servidores.getServidores().get(id).getTempo();
+                            long total = servidores.getServidores().get(id).geTempoTotal();
                             double preco = meuS.get(id).getPreco();
                             String sname = meuS.get(id).getServerName();
                             System.out.println("Consegui ver o server " + sname);
                             contas.getUtilizadores().get(nome).getMeuServers().remove(id);
+                            contas.getUtilizadores().get(nome).setCustoTotal((preco*total));
                             nome = userQ.remove(sname);
                             if(contas.getUtilizadores().containsKey(nome)){
                                 Utilizador u = contas.getUtilizadores().get(nome);
@@ -228,7 +229,7 @@ class SHandler implements Runnable {
                                 }
                             }
                             System.out.println("Total de tempo -> "+total+" e preco de server -> "+preco);
-                            out.println(total +" "+preco);
+                            out.println(total + " " +preco);
                             out.flush();
                         }finally{
                             l.unlock();
@@ -240,8 +241,9 @@ class SHandler implements Runnable {
                         meuS = contas.getUtilizadores().get(nome).getMeuServers();
                         for(Servidor s : meuS.values()){
                             System.out.println(s.geTempoTotal());
-                            sum += (s.geTempoTotal() * s.getPreco());
-                            System.out.println(sum);
+                            System.out.println("Tempo em horas -> "+ s.geTempoTotal()/60.0);
+                            sum += ((s.geTempoTotal()/60.0) * s.getPreco());
+                            System.out.println("Total do preço - > " +sum);
                         }
                         contas.getUtilizadores().get(nome).setCustoTotal(sum);
                         out.println(sum);
@@ -332,7 +334,6 @@ public class Server {
         Contas c = new Contas();
         Servidores v = new Servidores();
         UserQueue q = new UserQueue();
-        Clog clog = new Clog();
         
         //contas para teste...
         c.registaUser("a", "a");
@@ -348,12 +349,13 @@ public class Server {
         v.getServidores().put(1, s);
         v.getServidores().put(2,s1);
         
+        System.out.println("TEMPO -> " + LocalDateTime.now());
         while(true){
             Socket cs = ss.accept();
             
             System.out.println("Novo Cliente!!"); // so para ver se esta tudo direito....
             
-            Thread ts = new Thread(new SHandler(cs, c, v, q, clog));
+            Thread ts = new Thread(new SHandler(cs, c, v, q));
             
             ts.start();
         }

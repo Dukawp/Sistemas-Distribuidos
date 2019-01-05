@@ -7,7 +7,6 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.Scanner;
-import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -29,38 +28,35 @@ class CReader implements Runnable{
     private String nome;
     private final BufferedReader systemIn;
     private final BufferedReader in;
-    private final PrintWriter out;
     private final ReentrantLock l;
-    private Condition cond;
     private Clog clog;
 
     public CReader(Socket cs, Clog clog) throws IOException {
         this.cs = cs;
         this.clog = clog;
-        this.out = new PrintWriter(cs.getOutputStream(), true);
         this.systemIn = new BufferedReader(new InputStreamReader(System.in)); // pode ser substituido por System.console().readLine(); se estiver a usar consola em vez do IDE
         this.in = new BufferedReader(new InputStreamReader(cs.getInputStream()));
         this.l= new ReentrantLock();
-        this.cond = l.newCondition();
     }
     
 
     @Override
     public void run() {
-        
-        while( true ){
-            try {
-                /*if(!(nome.equals(""))){
-                System.out.println(nome);
+        String scan;
+        String[] scanner;
+        try {
+            while((scan = in.readLine())!=null){
+                System.out.println(scan);
+                scanner = scan.split(" ");
+                if(scanner[0].equals("notify")){
+                    System.out.println("FICASTE SEM SERVER SUA BESTA!!");
                 }
-                */
-                String message;
-                if( (message = clog.getLog(nome)) != null){
-                    System.out.println("MESSAGE ---> " + message);    
+                else{
+                        clog.addC(scan); 
                 }
-            } catch (InterruptedException ex) {
-                Logger.getLogger(CReader.class.getName()).log(Level.SEVERE, null, ex);
             }
+        } catch (IOException ex) {
+            Logger.getLogger(CReader.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 }
@@ -70,18 +66,15 @@ class CReader implements Runnable{
 class CHandler implements Runnable{
     
     private final Socket cs;
-    private String nome;
-    private final BufferedReader systemIn;
-    private final BufferedReader in;
     private final PrintWriter out;
     private final ReentrantLock l;
+    private Clog clog;
 
-    public CHandler(Socket cs) throws IOException {
+    public CHandler(Socket cs, Clog clog) throws IOException {
         this.cs = cs;
         this.out = new PrintWriter(cs.getOutputStream(), true);
-        this.systemIn = new BufferedReader(new InputStreamReader(System.in)); // pode ser substituido por System.console().readLine(); se estiver a usar consola em vez do IDE
-        this.in = new BufferedReader(new InputStreamReader(cs.getInputStream()));
         this.l= new ReentrantLock();
+        this.clog = clog;
     }
 
     @Override
@@ -144,17 +137,17 @@ class CHandler implements Runnable{
             switch(choice){
                 case 1 :
                     trataRegisto();
-                    if( (linha=in.readLine()) != null){
-                        if(linha.equals("true")) displayMenuP();
+                        if(clog.getLog().equals("true")) displayMenuP();
                         else {
                             System.out.println("Username já está a ser usado!");
                             displayMenuP();
                         }
-                    } 
-                    break;
+                     
+                break;
+                
                 case 2 :
                     trataLogin();
-                    if( (linha=in.readLine()) != null){
+                    linha = clog.getLog();
                         int num = Integer.parseInt(linha);
                         if( num == 1 ) {
                             System.out.println("Bem vindo !");
@@ -172,16 +165,18 @@ class CHandler implements Runnable{
                             System.out.println("Utilizador não existe!");
                             displayMenuP();
                         }
-                    } 
-                    break;
+                break;
+                
                 case 0 :
                     logout();
-                    break;
+                break;
+                
                 default : 
                     System.out.println("Opçao invalida....");
                     displayMenuP();
             }
     }
+    
    
     
     private void trataMServers() throws IOException, InterruptedException{
@@ -196,9 +191,11 @@ class CHandler implements Runnable{
                 case 1 : 
                     out.println("lservers");
                     out.flush();
-                    while( ((linha = in.readLine()) != null) && !(linha.equals("termina")) ){
+                    linha = clog.getLog();
+                    while(!(linha.equals("termina")) ){
                         System.out.println(linha);
                         i++;
+                        linha = clog.getLog();
                     }
                     if(i>0){
                         System.out.println("1 - Cancelar reserva servidor?");
@@ -217,13 +214,14 @@ class CHandler implements Runnable{
                         trataMServers();
                     }
                 break;
+                
                 case 2 :
                     out.println("div");
                     out.flush();
-                    if((linha = in.readLine()) != null){
+                    linha = clog.getLog();
                         System.out.println("Total em divida -> " + linha);
-                    }
                 break;
+                
                 case 0 :
                     displayMenuLogged();
                 break;
@@ -236,7 +234,7 @@ class CHandler implements Runnable{
         
     }
     
-    private void trataCancel() throws IOException{
+    private void trataCancel() throws IOException, InterruptedException{
         System.out.println("---Digite o ID do server que quer cancelar---");       
         Scanner scanner = new Scanner(System.in);
         int id = scanner.nextInt();
@@ -244,17 +242,18 @@ class CHandler implements Runnable{
             out.flush();
             String linha;
             String[] divide;
-            if((linha = in.readLine()) != null){
-                /*divide = linha.split(" ");       VER QUAL É O ERRO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
+            linha = clog.getLog();
+            System.out.println("ESTOU NO TRATACANCEL -> " + linha);
+                divide = linha.split(" ");      
                 if(Integer.parseInt(divide[0])> 0){
-                    System.out.println("Reserva de servidor com ID " + id + " cancelada!! Total a pagar -> "+ (Integer.parseInt(divide[0]))*(Integer.parseInt(divide[1])));
+                    System.out.println("Reserva de servidor com ID " + id + " cancelada!! Total a pagar -> "+ (((Integer.parseInt(divide[0]))/60)*(Integer.parseInt(divide[1]))));
                 }
                 else {
                     System.out.println("ID nao corresponde aos seus servidores!");
                     trataCancel();
-                }*/
+                }
                 System.out.println("************ " + linha);
-            }
+            
     }
     
     private void verServers() throws IOException, InterruptedException{
@@ -286,8 +285,10 @@ class CHandler implements Runnable{
         out.println("ls"+" "+tipo);
         out.flush();
         System.out.println("**********************");
-        while( ((linha = in.readLine()) != null) && !(linha.equals("termina")) ){
+        linha = clog.getLog();
+        while(!(linha.equals("termina")) ){
             System.out.println(linha);
+            linha = clog.getLog();
         }
         System.out.println("**********************\n");
         ReservarServer(tipo);
@@ -305,8 +306,8 @@ class CHandler implements Runnable{
                     // fazer um metodo com isto !!! trataReserva ..
                     out.println("res"+" "+tipo);
                     out.flush();
-                    if((linha = in.readLine()) != null){
-                        if(linha.equals("-1")){
+                    linha = clog.getLog();
+                    if(linha.equals("-1")){
                             System.out.println("---Sem servidores disponveis---");
                             System.out.println("Deseja ficar em fila de espera?");
                             System.out.println("1 - Sim ");
@@ -316,15 +317,15 @@ class CHandler implements Runnable{
                                 case 1 :
                                     out.println("sim");
                                     out.flush();
-                                    if ((linha = in.readLine()) != null){
+                                    linha = clog.getLog();
                                     System.out.println("Ficou em fila de espera em "+ linha + "º lugar");
-                                    }
-                                    if((linha = in.readLine()) != null){
-                                        System.out.println("Servidor " + linha +" alugado!");
-                                    }
-                                    break;
+                                    linha = clog.getLog();
+                                    System.out.println("Servidor " + linha +" alugado!");
+                                break;
+                                    
                                 case 2 : 
                                     displayMenuLogged();
+                                break;
                                 default :
                                     System.out.println("Opçao invalida....");
                                     displayMenuLogged();
@@ -335,11 +336,13 @@ class CHandler implements Runnable{
                             System.out.println("Servidor com ID " + linha+ " reservado!");
                             displayMenuLogged();
                         }
-                    }
-                    break;
+                    
+                break;
+                
                 case 0 :
                     displayMenuLogged();
-                    break;
+                break;
+                
                 default :
                     System.out.println("Opçao invalida....");
                     ReservarServer(tipo);
@@ -377,11 +380,13 @@ class CHandler implements Runnable{
         out.flush();
         System.out.println("**********************");
         int id;
-        linha = in.readLine();
+        linha = clog.getLog();
         if(!linha.equals("-1")) {
             id = Integer.parseInt(linha);
-            while( ((linha = in.readLine()) != null) && !(linha.equals("termina"))){
+            //aqui pode ter que levar linha = clog.getLog();!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
+            while(!(linha.equals("termina"))){
                 System.out.println(linha);
+                linha = clog.getLog();
             } 
         System.out.println("**********************\n");
         verLeilao(id);
@@ -414,7 +419,7 @@ class CHandler implements Runnable{
         switch(choice){
                 case 1 :
                     out.println("lic"+" "+id);
-                    linha = in.readLine();
+                    linha = clog.getLog();
                     System.out.println("Código para confirmar licitação: "+linha);
                     break;
 
@@ -442,7 +447,6 @@ class CHandler implements Runnable{
         System.out.println("Username: ");
         Scanner sc = new Scanner(System.in);
         String u = sc.nextLine();
-        nome = u;
         System.out.println("Password: ");
         String p = sc.nextLine();
         out.println("logi"+" "+u+" "+p);
@@ -467,7 +471,7 @@ public class Client {
         Clog clog = new Clog();
         String nome = "";
         
-        Thread th = new Thread(new CHandler(cs));
+        Thread th = new Thread(new CHandler(cs, clog));
         Thread tw = new Thread(new CReader(cs, clog));
         th.start();
         tw.start();
