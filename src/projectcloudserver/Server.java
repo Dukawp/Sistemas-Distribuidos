@@ -174,16 +174,17 @@ class SHandler implements Runnable {
                                 Servidor s = servidores.getServidores().get(i);
                                 System.out.println("Servidor com id "+s.getID() );
                                 //RETIREI AQUI ESTE IF SO PARA VER SE ESTAVA A FUNCIONAR
-                                if(s.getLeilao()){
+                                if(s.getLeilao() && !(s.getOwner().equals(nome))){
                                     String ntmp = s.getOwner();        
                                     System.out.println("Encontrei o owner -> " +ntmp);
+                                    servidores.getServidores().get(i).setLeilao(false);
                                     if(clientOut.getCout().containsKey(ntmp)){
                                         System.out.println("ESTOu aquI CRL");
+                                        PrintWriter bw = clientOut.getCout().get(ntmp);
+                                        bw.println("notify"+ " "+ "Reservar do seu server por leilao foi cancelada!");
+                                        bw.flush();
+                                        System.out.println("PASSEI DO FLUSH");
                                     }
-                                    PrintWriter bw = clientOut.getCout().get(ntmp);
-                                    bw.println("notify"+ " "+ "Reservar do seu server por leilao foi cancelada!");
-                                    bw.flush();
-                                    System.out.println("PASSEI DO FLUSH");
                                 }
                                 s.setOwner(nome);
                                 contas.getUtilizadores().get(nome).getMeuServers().put(i,s);
@@ -373,7 +374,7 @@ public class Server {
         c.registaUser("d", "d");
         
         Date df =  new Date(2019,0,4,21,26,40);
-        Servidor s = new Servidor("m2", 0.99, 1,df,0.90);
+        Servidor s = new Servidor("m5", 0.99, 1,df,0.90);
         Servidor s1 = new Servidor("m5",0.99,2,df,0.89);
         s1.setLeilao(true);
         s1.setOwner("b");
