@@ -29,7 +29,22 @@ import java.util.Date;
  * @author Duka_
  */
 
-
+class ClientOut {
+    
+    private HashMap<String, PrintWriter> cout;
+    
+    public ClientOut(){
+        this.cout = new HashMap<>();
+    }
+    
+    public void registarOut(String nome, PrintWriter out){
+        this.cout.put(nome, out);
+    }
+    
+    public HashMap<String, PrintWriter> getCout(){
+        return this.cout;
+    }
+}
 
 class SHandler implements Runnable {
     private final Socket cs;
@@ -41,11 +56,11 @@ class SHandler implements Runnable {
     private final PrintWriter out;
     private String nome;
     private final Condition condS;
-    private Map<String, PrintWriter> clientOut;
+    private final ClientOut clientOut;
     private HashMap<Integer,List<Utilizador>> leiloes = new HashMap();
 
     
-    public SHandler(Socket cs, Contas contas,Servidores servidores, UserQueue userQ) throws IOException{
+    public SHandler(Socket cs, Contas contas,Servidores servidores, UserQueue userQ, ClientOut clientOut) throws IOException{
         this.cs = cs;
         this.contas = contas;
         this.servidores = servidores;
@@ -55,7 +70,7 @@ class SHandler implements Runnable {
         this.nome = null;
         this.l = new ReentrantLock();
         this.condS = l.newCondition();
-        this.clientOut = new HashMap<>();
+        this.clientOut = clientOut;
         this.leiloes = new HashMap<>();
     }
     
@@ -122,7 +137,10 @@ class SHandler implements Runnable {
                                 i = contas.efetuaLogin(username, divide[2]);
                                 if(i==1) {
                                     nome = username;
-                                    clientOut.put(nome, out);
+                                    clientOut.registarOut(nome, out);
+                                    if(clientOut.getCout().containsKey(nome)){
+                                        System.out.println("MAU ERA CRL!!");
+                                    }
                                 }
                                 out.println(i);
                                 out.flush();
@@ -156,13 +174,17 @@ class SHandler implements Runnable {
                                 Servidor s = servidores.getServidores().get(i);
                                 System.out.println("Servidor com id "+s.getID() );
                                 //RETIREI AQUI ESTE IF SO PARA VER SE ESTAVA A FUNCIONAR
-                                //if(s.getLeilao()){
-                                  //  String ntmp = s.getOwner();
-                                        //Se mandar para um log e do outro lado so o reader é que acede ao log deve funcionar...
-                                    //    clog.addS(ntmp,"ja foste!");
-                                        /*clientOut.get(ntmp).println("Reservar do seu server por leilao foi cancelada!");
-                                        clientOut.get(ntmp).flush();*/
-                                //}
+                                if(s.getLeilao()){
+                                    String ntmp = s.getOwner();        
+                                    System.out.println("Encontrei o owner -> " +ntmp);
+                                    if(clientOut.getCout().containsKey(ntmp)){
+                                        System.out.println("ESTOu aquI CRL");
+                                    }
+                                    PrintWriter bw = clientOut.getCout().get(ntmp);
+                                    bw.println("notify"+ " "+ "Reservar do seu server por leilao foi cancelada!");
+                                    bw.flush();
+                                    System.out.println("PASSEI DO FLUSH");
+                                }
                                 s.setOwner(nome);
                                 contas.getUtilizadores().get(nome).getMeuServers().put(i,s);
                                 out.println(s.getID());
@@ -210,26 +232,31 @@ class SHandler implements Runnable {
                             //meuS = contas.getUtilizadores().get(nome).getMeuServers();
                             System.out.println(divide[1]);
                             int id = Integer.parseInt(divide[1]);
-                            servidores.getServidores().get(id).setDisponivel(true);
-                            servidores.getServidores().get(id).setNoOwner();
-                            long total = servidores.getServidores().get(id).geTempoTotal();
-                            double preco = meuS.get(id).getPreco();
-                            String sname = meuS.get(id).getServerName();
-                            System.out.println("Consegui ver o server " + sname);
-                            contas.getUtilizadores().get(nome).getMeuServers().remove(id);
-                            contas.getUtilizadores().get(nome).setCustoTotal((preco*total));
-                            nome = userQ.remove(sname);
-                            if(contas.getUtilizadores().containsKey(nome)){
-                                Utilizador u = contas.getUtilizadores().get(nome);
-                                try{
-                                    u.l.lock();
-                                    u.condC.signal();
-                                }finally{
-                                    u.l.unlock();
+                            if(meuS.containsKey(id)){
+                                servidores.getServidores().get(id).setDisponivel(true);
+                                servidores.getServidores().get(id).setNoOwner();
+                                long total = servidores.getServidores().get(id).geTempoTotal();
+                                double preco = meuS.get(id).getPreco();
+                                String sname = meuS.get(id).getServerName();
+                                System.out.println("Consegui ver o server " + sname);
+                                contas.getUtilizadores().get(nome).getMeuServers().remove(id);
+                                contas.getUtilizadores().get(nome).setCustoTotal((preco*total));
+                                nome = userQ.remove(sname);
+                                if(contas.getUtilizadores().containsKey(nome)){
+                                    Utilizador u = contas.getUtilizadores().get(nome);
+                                    try{
+                                        u.l.lock();
+                                        u.condC.signal();
+                                    }finally{
+                                        u.l.unlock();
+                                    }
                                 }
+                                System.out.println("Total de tempo -> "+total+" e preco de server -> "+preco);
+                                out.println("1"+" "+total + " " +preco);
                             }
-                            System.out.println("Total de tempo -> "+total+" e preco de server -> "+preco);
-                            out.println(total + " " +preco);
+                            else{
+                                out.println("0");
+                            }
                             out.flush();
                         }finally{
                             l.unlock();
@@ -239,16 +266,19 @@ class SHandler implements Runnable {
                     case "div":
                         double sum = 0;
                         meuS = contas.getUtilizadores().get(nome).getMeuServers();
-                        for(Servidor s : meuS.values()){
-                            System.out.println(s.geTempoTotal());
-                            System.out.println("Tempo em horas -> "+ s.geTempoTotal()/60.0);
-                            sum += ((s.geTempoTotal()/60.0) * s.getPreco());
-                            System.out.println("Total do preço - > " +sum);
+                        if(!(meuS.isEmpty())){
+                            for(Servidor s : meuS.values()){
+                                System.out.println(s.geTempoTotal());
+                                System.out.println("Tempo em horas -> "+ s.geTempoTotal()/60.0);
+                                sum += ((s.geTempoTotal()/60.0) * s.getPreco());
+                                System.out.println("Total do preço - > " +sum);
+                            }
+                            contas.getUtilizadores().get(nome).setCustoTotal(sum);
                         }
-                        contas.getUtilizadores().get(nome).setCustoTotal(sum);
                         out.println(sum);
                         out.flush();
                     break;
+                    
                     case "lo":
                         try{
                             l.lock();
@@ -334,6 +364,7 @@ public class Server {
         Contas c = new Contas();
         Servidores v = new Servidores();
         UserQueue q = new UserQueue();
+        ClientOut cO = new ClientOut();
         
         //contas para teste...
         c.registaUser("a", "a");
@@ -355,7 +386,7 @@ public class Server {
             
             System.out.println("Novo Cliente!!"); // so para ver se esta tudo direito....
             
-            Thread ts = new Thread(new SHandler(cs, c, v, q));
+            Thread ts = new Thread(new SHandler(cs, c, v, q, cO));
             
             ts.start();
         }

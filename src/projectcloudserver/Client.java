@@ -46,7 +46,6 @@ class CReader implements Runnable{
         String[] scanner;
         try {
             while((scan = in.readLine())!=null){
-                System.out.println(scan);
                 scanner = scan.split(" ");
                 if(scanner[0].equals("notify")){
                     System.out.println("FICASTE SEM SERVER SUA BESTA!!");
@@ -245,15 +244,13 @@ class CHandler implements Runnable{
             linha = clog.getLog();
             System.out.println("ESTOU NO TRATACANCEL -> " + linha);
                 divide = linha.split(" ");      
-                if(Integer.parseInt(divide[0])> 0){
+                if(Integer.parseInt(divide[0]) == 1){
                     System.out.println("Reserva de servidor com ID " + id + " cancelada!! Total a pagar -> "+ (((Integer.parseInt(divide[0]))/60)*(Integer.parseInt(divide[1]))));
                 }
                 else {
                     System.out.println("ID nao corresponde aos seus servidores!");
-                    trataCancel();
                 }
-                System.out.println("************ " + linha);
-            
+                System.out.println("************");
     }
     
     private void verServers() throws IOException, InterruptedException{
