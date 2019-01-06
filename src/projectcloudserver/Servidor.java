@@ -6,7 +6,6 @@
 package projectcloudserver;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.time.Duration;
 
 /**
@@ -22,10 +21,10 @@ public class Servidor {
     private boolean leilao;
     private LocalDateTime tempoRes;
     private String owner;
-    private Date dataf;
+    private LocalDateTime dataf;
     private double valorL;
     
-    public Servidor(String servername, double preco, int id, Date df, double valorL){
+    public Servidor(String servername, double preco, int id, LocalDateTime df, double valorL){
         this.servername = servername;
         this.preco = preco;
         this.id = id;
@@ -49,11 +48,11 @@ public class Servidor {
         this.valorL = this.getValorL() + 0.05;
     }
 
-    public Date getDataf() {
+    public LocalDateTime getDataf() {
         return dataf;
     }
 
-    public void setDataf(Date dataf) {
+    public void setDataf(LocalDateTime dataf) {
         this.dataf = dataf;
     }
     

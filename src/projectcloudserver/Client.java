@@ -55,6 +55,7 @@ class CReader implements Runnable{
                         
                     case "notifyNL" :
                         System.out.println("Alguma besta deu mais do que tu no leilão com o código:"+scanner[1]);
+                        break;
                         
                     default :     
                         clog.addC(scan); 

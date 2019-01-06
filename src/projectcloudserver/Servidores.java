@@ -63,7 +63,7 @@ public class Servidores {
     public HashMap<Integer,Servidor> getLeiloes() {
         HashMap<Integer,Servidor> ret = new HashMap();
         for(Servidor a : servidores.values()) {
-            if(a.getLeilao()){
+            if(a.getLeilao() && a.getDisponivel()){
                 ret.put(a.getID(),a);
             }
         }

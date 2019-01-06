@@ -14,13 +14,13 @@ import java.net.Socket;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.Date;
 
 
 
@@ -56,10 +56,11 @@ class SHandler implements Runnable {
     private final PrintWriter out;
     private String nome;
     private final Condition condS;
-    private final ClientOut clientOut;
+    private final ClientOut clientOut; 
+    private HashMap<Integer,ArrayList<String>> leiloes;
 
     
-    public SHandler(Socket cs, Contas contas,Servidores servidores, UserQueue userQ, ClientOut clientOut) throws IOException{
+    public SHandler(Socket cs, Contas contas,Servidores servidores, UserQueue userQ, ClientOut clientOut,HashMap<Integer,ArrayList<String>> leiloes ) throws IOException{
         this.cs = cs;
         this.contas = contas;
         this.servidores = servidores;
@@ -70,6 +71,7 @@ class SHandler implements Runnable {
         this.l = new ReentrantLock();
         this.condS = l.newCondition();
         this.clientOut = clientOut;
+        this.leiloes = leiloes;
     }
     
     @Override
@@ -319,16 +321,37 @@ class SHandler implements Runnable {
                             l.lock();
                             int id = Integer.parseInt(divide[1]);
                             Utilizador u = contas.getUtilizadores().get(nome);
-                            servidores.getServidores().get(id).addValorL();
-                            String prevowner = servidores.getServidores().get(id).getOwner();
-                            servidores.getServidores().get(id).setOwner(nome);
-                            /*regista licitacao*/
+                            Servidor s = servidores.getServidores().get(id);
+                           
+                            if(!leiloes.containsKey(id)){
+                                ArrayList<String> aux = new ArrayList();
+                                leiloes.put(id,aux);
+                            }
+                                
+                            if(!leiloes.get(id).contains(nome)) {
+                                leiloes.get(id).add(nome);
+                            }
+                            
+                            s.setOwner(nome);
+                            s.addValorL();
+                            /*registou licitacao e envia msg para cliente*/
                             PrintWriter bw = clientOut.getCout().get(nome);
                             bw.println(id+nome);
                             bw.flush();
-                            bw = clientOut.getCout().get(prevowner);
-                            bw.println("notityNL"+" "+id+prevowner);
-                            bw.flush();
+                            /*avisa todos os cliente que estavam no leilão*/
+                            for(String prevOwners : leiloes.get(id)){
+                                if(!prevOwners.equals(nome)) {
+                                    PrintWriter cw;
+                                    cw = clientOut.getCout().get(prevOwners);
+                                    cw.println("notifyNL"+" "+id+prevOwners);
+                                    cw.flush();
+                                    }
+                                }
+                            /*
+                            while(s.getDisponivel() && LocalDateTime.now().isAfter(s.getDataf())){
+                                
+                            }*/
+                            
                         }finally {
                             l.unlock();
                         } 
@@ -362,13 +385,13 @@ public class Server {
         c.registaUser("c", "c");
         c.registaUser("d", "d");
         
-        Date df =  new Date(2019,0,4,21,26,40);
+        LocalDateTime df =  LocalDateTime.of(2019,6,1,21,26);
         Servidor s = new Servidor("m5", 0.99, 1,df,0.90);
         Servidor s1 = new Servidor("m5",0.99,2,df,0.89);
         s1.setLeilao(true);
-        s1.setOwner("b");
         v.getServidores().put(1, s);
         v.getServidores().put(2,s1);
+        HashMap<Integer,ArrayList<String>> leiloes = new HashMap();
         
         System.out.println("TEMPO -> " + LocalDateTime.now());
         while(true){
@@ -376,7 +399,7 @@ public class Server {
             
             System.out.println("Novo Cliente!!"); // so para ver se esta tudo direito....
             
-            Thread ts = new Thread(new SHandler(cs, c, v, q, cO));
+            Thread ts = new Thread(new SHandler(cs, c, v, q, cO,leiloes));
             
             ts.start();
         }
