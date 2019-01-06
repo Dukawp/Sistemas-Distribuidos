@@ -1,3 +1,0 @@
-projectcloudserver.CReader
-projectcloudserver.CHandler
-projectcloudserver.Client
