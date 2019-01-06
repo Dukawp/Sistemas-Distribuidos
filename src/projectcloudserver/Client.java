@@ -50,11 +50,11 @@ class CReader implements Runnable{
                 String choice = scanner[0];
                 switch(choice) {
                     case "notify" :
-                    System.out.println("FICASTE SEM SERVER SUA BESTA!!");
+                    System.out.println("A sua reserva do server obtido em leilao foi cancelada!" + scanner[1]);
                     break;
                         
                     case "notifyNL" :
-                        System.out.println("Reserva perdida ! "+scanner[1]);
+                        System.out.println("Reserva perdida devido a nova licitação ! "+scanner[1]);
                         break;
                         
                     default :     
@@ -250,7 +250,6 @@ class CHandler implements Runnable{
             String linha;
             String[] divide;
             linha = clog.getLog();
-            System.out.println("ESTOU NO TRATACANCEL -> " + linha);
                 divide = linha.split(" ");      
                 if(Integer.parseInt(divide[0]) == 1){
                     System.out.println("Reserva de servidor com ID " + id + " cancelada!! Total a pagar -> "+ (((Integer.parseInt(divide[0]))/60)*(Integer.parseInt(divide[1]))));
@@ -262,26 +261,31 @@ class CHandler implements Runnable{
     }
     
     private void verServers() throws IOException, InterruptedException{
-        System.out.println("1 - Ver m5...");
-        System.out.println("2 - Ver t3...");
-        System.out.println("3 - Ver a2...");
-        System.out.println("4 - Ver c1...");
+        System.out.println("1 - Ver m5.large");
+        System.out.println("2 - Ver t3.micro");
+        System.out.println("3 - Ver a1.medium");
+        System.out.println("4 - Ver c5.large");
+        System.out.println("5 - Ver i3.metal");
+        
         String tipo = null;
         Scanner scanner = new Scanner(System.in);
             int choice  = scanner.nextInt();
             String linha;
             switch(choice){
                 case 1 :
-                    tipo = "m5";
+                    tipo = "m5.large";
                     break;
                 case 2 :
-                    tipo = "t3";
+                    tipo = "t3.micro";
                     break;
                 case 3 :
-                    tipo = "a2";
+                    tipo = "a1.medium";
                     break;
                 case 4 :
-                    tipo = "c1";
+                    tipo = "c5.large";
+                    break;
+                case 5 :
+                    tipo = "i3.metal";
                     break;
                 default : 
                     System.out.println("Opçao invalida....");
@@ -357,26 +361,30 @@ class CHandler implements Runnable{
     
     private void displayLeiloes() throws IOException, InterruptedException {
         System.out.println("Escolha servidor que pretende Leilão :");
-        System.out.println("1 - Ver m5...");
-        System.out.println("2 - Ver t3...");
-        System.out.println("3 - Ver a2...");
-        System.out.println("4 - Ver c1...");
+        System.out.println("1 - Ver m5.large");
+        System.out.println("2 - Ver t3.micro");
+        System.out.println("3 - Ver a1.medium");
+        System.out.println("4 - Ver c5.large");
+        System.out.println("5 - Ver i3.metal");
         String tipo = null;
         Scanner scanner = new Scanner(System.in);
             int choice  = scanner.nextInt();
             String linha;
             switch(choice){
                 case 1 :
-                    tipo = "m5";
+                    tipo = "m5.large";
                     break;
                 case 2 :
-                    tipo = "t3";
+                    tipo = "t3.micro";
                     break;
                 case 3 :
-                    tipo = "a2";
+                    tipo = "a1.medium";
                     break;
                 case 4 :
-                    tipo = "c1";
+                    tipo = "c5.large";
+                    break;
+                case 5 :
+                    tipo = "i3.metal";
                     break;
                 default : 
                     System.out.println("Opçao invalida....");

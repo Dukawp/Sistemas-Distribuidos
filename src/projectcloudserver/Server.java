@@ -12,7 +12,6 @@ import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.locks.Condition;
@@ -166,20 +165,16 @@ class SHandler implements Runnable {
                             if( i >= 0){
                                 Servidor s = servidores.getServidores().get(i);
                                 System.out.println("Servidor com id "+s.getID() );
-                                System.out.println("NOME DO OWNER -> " + s.getOwner());
                                 String ntmp = s.getOwner();
                                 s.setOwner(nome);
                                 if(s.getLeilao() && !(ntmp.equals("")) ){
-                                    System.out.println("Encontrei o owner -> " +ntmp);
                                     servidores.getServidores().get(i).setLeilao(false);
                                     contas.getUtilizadores().get(ntmp).getMeuServers().remove(i);
                                     contas.getUtilizadores().get(ntmp).setCustoTotal((s.geTempoTotal()/60) * s.getValorL());
                                     if(clientOut.getCout().containsKey(ntmp)){
-                                        System.out.println("ESTOu aquI CRL");
                                         PrintWriter bw = clientOut.getCout().get(ntmp);
-                                        bw.println("notify"+ " "+ "Reservar do seu server por leilao foi cancelada!");
+                                        bw.println("notify"+ " "+ "ID : " +i);
                                         bw.flush();
-                                        System.out.println("PASSEI DO FLUSH");
                                     }
                                 }
                                 s.setOwner(nome);
@@ -198,7 +193,6 @@ class SHandler implements Runnable {
                                     out.println(userQ.getUQ().get(divide[1]).size());
                                     out.flush();
                                     while( ( userQ.getUQ().get(divide[1]).contains(u) ) ){// ver qual a condiçao de paragem!!!
-                                        System.out.println("Vou ficar a espera do signal!!!!!");
                                         try{
                                             u.l.lock();
                                             u.condC.await();
@@ -227,7 +221,6 @@ class SHandler implements Runnable {
                     case "cancelS":
                         try{
                             l.lock();
-                            //meuS = contas.getUtilizadores().get(nome).getMeuServers();
                             System.out.println(divide[1]);
                             int id = Integer.parseInt(divide[1]);
                             double preco;
@@ -272,9 +265,7 @@ class SHandler implements Runnable {
                         if(!(meuS.isEmpty())){
                             for(Servidor s : meuS.values()){
                                 System.out.println(s.geTempoTotal());
-                                System.out.println("Tempo em horas -> "+ s.geTempoTotal()/60.0);
                                 sum += ((s.geTempoTotal()/60.0) * s.getPreco());
-                                System.out.println("Total do preço - > " +sum);
                             }
                             contas.getUtilizadores().get(nome).setCustoTotal(sum);
                         }
@@ -379,13 +370,33 @@ public class Server {
         c.registaUser("d", "d");
         
         LocalDateTime df =  LocalDateTime.of(2019,6,1,21,26);
-        Servidor s = new Servidor("m5", 0.99,1,df,0.90);
-        Servidor s1 = new Servidor("m5",0.99,2,df,0.89);
+        Servidor s = new Servidor("m5.large", 0.99,1,df,0.80);
+        Servidor s1 = new Servidor("m5.large",0.99,2,df,0.80);
+        Servidor s2 = new Servidor("i3.metal",1.20,3,df,0.90);
+        Servidor s3 = new Servidor("i3.metal",1.20,4,df,0.90);
+        Servidor s4 = new Servidor("c5.large",1.40,5,df,1.00);
+        Servidor s5 = new Servidor("c5.large",1.40,6,df,1.00);
+        Servidor s6 = new Servidor("a1.medium",0.75,7,df,0.45);
+        Servidor s7 = new Servidor("t3.micro",0.50,8,df,0.30);
+        
+        s1.setTempoInicial();
         s1.setLeilao(true);
         s1.setDisponivel(false);
         s1.setOwner("b");
+        
+        s4.setTempoInicial();
+        s4.setLeilao(true);
+        s4.setDisponivel(false);
+        s4.setOwner("b");
+        
         v.getServidores().put(1,s);
         v.getServidores().put(2,s1);
+        v.getServidores().put(3,s2);
+        v.getServidores().put(4,s3);
+        v.getServidores().put(5,s4);
+        v.getServidores().put(6,s5);
+        v.getServidores().put(7,s6);
+        v.getServidores().put(8,s7);
         
         System.out.println("TEMPO -> " + LocalDateTime.now());
         while(true){

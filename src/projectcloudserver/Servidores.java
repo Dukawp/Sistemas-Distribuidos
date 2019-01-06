@@ -15,7 +15,7 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class Servidores {
  
-    Map<Integer,Servidor> servidores;  // identificador de reserva ???
+    Map<Integer,Servidor> servidores;  // identificador de reserva 
     ReentrantLock l = new ReentrantLock();    
     
     public Servidores(){
@@ -31,14 +31,14 @@ public class Servidores {
         l.lock();
         int r = -1 ;
         try {
-            for(Servidor s : servidores.values()){// FALTA TRATAR NO CASO DO SERVER ESTAR EM LEILAO!!!!
+            for(Servidor s : servidores.values()){
                 if(s.getServerName().equals(tipo) && s.getDisponivel() && !s.getLeilao()){
                     r = s.getID();
                     s.setDisponivel(false);
                 }
             }
             if(r==-1){
-                for(Servidor s : servidores.values()){// FALTA TRATAR NO CASO DO SERVER ESTAR EM LEILAO!!!!
+                for(Servidor s : servidores.values()){
                     if(s.getServerName().equals(tipo) && (s.getLeilao() && !s.getDisponivel() && (s.getValorL() < s.getPreco()) ) ){
                         r = s.getID();
                     }

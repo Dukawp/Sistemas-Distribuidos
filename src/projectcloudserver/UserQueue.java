@@ -47,14 +47,12 @@ public class UserQueue {
     public String remove(String servername){
         try{
             l.lock();
-            System.out.println("ENTREI NO REMOVE!!!!!!!!!!");
             String nome = null;
             if(tqueue.containsKey(servername)){
                 Utilizador u = tqueue.get(servername).get(0);
                 nome = u.getUsername();
                 System.out.println("USER " +u.getUsername());
                 tqueue.get(servername).remove(0);
-                System.out.println("REMOVIDO DA FILA DE ESPERA!!!!!!");
             }
             else{
                 System.out.println("NAO HA NINGUEM EM FILA DE ESPERA!!!");

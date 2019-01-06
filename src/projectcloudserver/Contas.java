@@ -23,10 +23,6 @@ public class Contas {
         this.l = new ReentrantLock();
     }
 
-    /*public Contas(Map<String, Utilizador> utilizadores) {
-        this.utilizadores = utilizadores;
-    }*/
-
     public Map<String, Utilizador> getUtilizadores() {
         return utilizadores;
     }
@@ -53,11 +49,10 @@ public class Contas {
     public int efetuaLogin(String username, String password) throws ClienteExistenteException{
         l.lock();
         try {
-            //System.out.println("ENTRALOGIN");
             if((utilizadores.containsKey(username))){
                 if((utilizadores.get(username).getPassword().equals(password))){
                     if((utilizadores.get(username).getLog() == false)){
-                        System.out.println("DADOS::::"+utilizadores.get(username).getPassword());
+                        System.out.println("DADOS:::: "+utilizadores.get(username).getPassword());
                         System.out.println("Login efetuado");
                         utilizadores.get(username).setLog(true);
                         return 1;
