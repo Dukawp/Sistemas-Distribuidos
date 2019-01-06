@@ -52,7 +52,6 @@ class SHandler implements Runnable {
     private final BufferedReader in;
     private final PrintWriter out;
     private String nome;
-    private final Condition condS;
     private final ClientOut clientOut; 
 
     
@@ -65,7 +64,6 @@ class SHandler implements Runnable {
         this.in = new BufferedReader(new InputStreamReader(cs.getInputStream()));
         this.nome = null;
         this.l = new ReentrantLock();
-        this.condS = l.newCondition();
         this.clientOut = clientOut;
     }
     
