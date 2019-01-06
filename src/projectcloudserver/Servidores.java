@@ -31,11 +31,18 @@ public class Servidores {
         l.lock();
         int r = -1 ;
         try {
-            for(Servidor s : servidores.values())// FALTA TRATAR NO CASO DO SERVER ESTAR EM LEILAO!!!!
-            if(s.getServerName().equals(tipo) && (s.getDisponivel() || s.getLeilao())){
-                r = s.getID();
-                s.setDisponivel(false);
-                s.setTempoInicial();
+            for(Servidor s : servidores.values()){// FALTA TRATAR NO CASO DO SERVER ESTAR EM LEILAO!!!!
+                if(s.getServerName().equals(tipo) && s.getDisponivel() && !s.getLeilao()){
+                    r = s.getID();
+                    s.setDisponivel(false);
+                }
+            }
+            if(r==-1){
+                for(Servidor s : servidores.values()){// FALTA TRATAR NO CASO DO SERVER ESTAR EM LEILAO!!!!
+                    if(s.getServerName().equals(tipo) && (s.getLeilao() && !s.getDisponivel() && (s.getValorL() < s.getPreco()) ) ){
+                        r = s.getID();
+                    }
+                }
             }
         } finally {
             l.unlock();

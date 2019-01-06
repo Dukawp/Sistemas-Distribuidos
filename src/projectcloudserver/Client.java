@@ -54,7 +54,7 @@ class CReader implements Runnable{
                     break;
                         
                     case "notifyNL" :
-                        System.out.println("Alguma besta deu mais do que tu no leilão com o código:"+scanner[1]);
+                        System.out.println("Reserva perdida ! "+scanner[1]);
                         break;
                         
                     default :     
@@ -425,7 +425,7 @@ class CHandler implements Runnable{
                 case 1 :
                     out.println("lic"+" "+id);
                     linha = clog.getLog();
-                    System.out.println("Código para reclamar leilão:"+linha);
+                    System.out.println("Servidor reservado com id : "+linha);
                     displayMenuLogged();
                     break;
 

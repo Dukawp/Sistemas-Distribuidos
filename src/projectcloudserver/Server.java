@@ -55,10 +55,9 @@ class SHandler implements Runnable {
     private String nome;
     private final Condition condS;
     private final ClientOut clientOut; 
-    private HashMap<Integer,ArrayList<String>> leiloes;
 
     
-    public SHandler(Socket cs, Contas contas,Servidores servidores, UserQueue userQ, ClientOut clientOut,HashMap<Integer,ArrayList<String>> leiloes ) throws IOException{
+    public SHandler(Socket cs, Contas contas,Servidores servidores, UserQueue userQ, ClientOut clientOut) throws IOException{
         this.cs = cs;
         this.contas = contas;
         this.servidores = servidores;
@@ -69,7 +68,6 @@ class SHandler implements Runnable {
         this.l = new ReentrantLock();
         this.condS = l.newCondition();
         this.clientOut = clientOut;
-        this.leiloes = leiloes;
     }
     
     @Override
@@ -136,9 +134,6 @@ class SHandler implements Runnable {
                                 if(i==1) {
                                     nome = username;
                                     clientOut.registarOut(nome, out);
-                                    if(clientOut.getCout().containsKey(nome)){
-                                        System.out.println("MAU ERA CRL!!");
-                                    }
                                 }
                                 out.println(i);
                                 out.flush();
@@ -171,11 +166,14 @@ class SHandler implements Runnable {
                             if( i >= 0){
                                 Servidor s = servidores.getServidores().get(i);
                                 System.out.println("Servidor com id "+s.getID() );
-                                //RETIREI AQUI ESTE IF SO PARA VER SE ESTAVA A FUNCIONAR
-                                if(s.getLeilao() && !(s.getOwner().equals(nome))){
-                                    String ntmp = s.getOwner();        
+                                System.out.println("NOME DO OWNER -> " + s.getOwner());
+                                String ntmp = s.getOwner();
+                                s.setOwner(nome);
+                                if(s.getLeilao() && !(ntmp.equals("")) ){
                                     System.out.println("Encontrei o owner -> " +ntmp);
                                     servidores.getServidores().get(i).setLeilao(false);
+                                    contas.getUtilizadores().get(ntmp).getMeuServers().remove(i);
+                                    contas.getUtilizadores().get(ntmp).setCustoTotal((s.geTempoTotal()/60) * s.getValorL());
                                     if(clientOut.getCout().containsKey(ntmp)){
                                         System.out.println("ESTOu aquI CRL");
                                         PrintWriter bw = clientOut.getCout().get(ntmp);
@@ -185,6 +183,7 @@ class SHandler implements Runnable {
                                     }
                                 }
                                 s.setOwner(nome);
+                                s.setTempoInicial();
                                 contas.getUtilizadores().get(nome).getMeuServers().put(i,s);
                                 out.println(s.getID());
                             }
@@ -231,13 +230,18 @@ class SHandler implements Runnable {
                             //meuS = contas.getUtilizadores().get(nome).getMeuServers();
                             System.out.println(divide[1]);
                             int id = Integer.parseInt(divide[1]);
+                            double preco;
                             if(meuS.containsKey(id)){
                                 servidores.getServidores().get(id).setDisponivel(true);
                                 servidores.getServidores().get(id).setNoOwner();
                                 long total = servidores.getServidores().get(id).geTempoTotal();
-                                double preco = meuS.get(id).getPreco();
+                                if(meuS.get(id).getLeilao()){
+                                    preco = meuS.get(id).getValorL();
+                                }
+                                else{
+                                    preco = meuS.get(id).getPreco();
+                                }
                                 String sname = meuS.get(id).getServerName();
-                                System.out.println("Consegui ver o server " + sname);
                                 contas.getUtilizadores().get(nome).getMeuServers().remove(id);
                                 contas.getUtilizadores().get(nome).setCustoTotal((preco*total));
                                 nome = userQ.remove(sname);
@@ -317,34 +321,30 @@ class SHandler implements Runnable {
                     case "lic":
                         try {
                             l.lock();
+                            PrintWriter bw;
                             int id = Integer.parseInt(divide[1]);
                             Utilizador u = contas.getUtilizadores().get(nome);
                             Servidor s = servidores.getServidores().get(id);
                            
-                            if(!leiloes.containsKey(id)){
-                                ArrayList<String> aux = new ArrayList();
-                                leiloes.put(id,aux);
-                            }
-                                
-                            if(!leiloes.get(id).contains(nome)) {
-                                leiloes.get(id).add(nome);
+                            String prevOwner = servidores.getServidores().get(id).getOwner();
+                            if(!prevOwner.equals("")){
+                                Utilizador a = contas.getUtilizadores().get(prevOwner);
+                                a.setCustoTotal((s.geTempoTotal()/60.0) * s.getPreco());
+                                a.getMeuServers().remove(id);
+                                bw = clientOut.getCout().get(prevOwner);
+                                bw.println("notifyNL" + " "+ "Server custou -> " + (s.geTempoTotal()/60.0) * s.getPreco());
+                                bw.flush();
                             }
                             
                             s.setOwner(nome);
                             s.addValorL();
-                            /*registou licitacao e envia msg para cliente*/
-                            PrintWriter bw = clientOut.getCout().get(nome);
-                            bw.println(id+nome);
+                            s.setTempoInicial();
+                            u.getMeuServers().put(id, s);
+                            
+                            
+                            bw = clientOut.getCout().get(nome);
+                            bw.println(id);
                             bw.flush();
-                            /*avisa todos os cliente que estavam no leilão*/
-                            for(String prevOwners : leiloes.get(id)){
-                                if(!prevOwners.equals(nome)) {
-                                    PrintWriter cw;
-                                    cw = clientOut.getCout().get(prevOwners);
-                                    cw.println("notifyNL"+" "+id+prevOwners);
-                                    cw.flush();
-                                    }
-                                }
                         }finally {
                             l.unlock();
                         } 
@@ -379,12 +379,13 @@ public class Server {
         c.registaUser("d", "d");
         
         LocalDateTime df =  LocalDateTime.of(2019,6,1,21,26);
-        Servidor s = new Servidor("m5", 0.99, 1,df,0.90);
+        Servidor s = new Servidor("m5", 0.99,1,df,0.90);
         Servidor s1 = new Servidor("m5",0.99,2,df,0.89);
         s1.setLeilao(true);
-        v.getServidores().put(1, s);
+        s1.setDisponivel(false);
+        s1.setOwner("b");
+        v.getServidores().put(1,s);
         v.getServidores().put(2,s1);
-        HashMap<Integer,ArrayList<String>> leiloes = new HashMap();
         
         System.out.println("TEMPO -> " + LocalDateTime.now());
         while(true){
@@ -392,7 +393,7 @@ public class Server {
             
             System.out.println("Novo Cliente!!"); // so para ver se esta tudo direito....
             
-            Thread ts = new Thread(new SHandler(cs, c, v, q, cO,leiloes));
+            Thread ts = new Thread(new SHandler(cs, c, v, q, cO));
             
             ts.start();
         }
