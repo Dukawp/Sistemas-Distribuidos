@@ -14,9 +14,7 @@ import java.net.Socket;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
@@ -347,11 +345,6 @@ class SHandler implements Runnable {
                                     cw.flush();
                                     }
                                 }
-                            /*
-                            while(s.getDisponivel() && LocalDateTime.now().isAfter(s.getDataf())){
-                                
-                            }*/
-                            
                         }finally {
                             l.unlock();
                         } 
