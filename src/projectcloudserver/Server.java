@@ -57,7 +57,6 @@ class SHandler implements Runnable {
     private String nome;
     private final Condition condS;
     private final ClientOut clientOut;
-    private HashMap<Integer,List<Utilizador>> leiloes = new HashMap();
 
     
     public SHandler(Socket cs, Contas contas,Servidores servidores, UserQueue userQ, ClientOut clientOut) throws IOException{
@@ -71,7 +70,6 @@ class SHandler implements Runnable {
         this.l = new ReentrantLock();
         this.condS = l.newCondition();
         this.clientOut = clientOut;
-        this.leiloes = new HashMap<>();
     }
     
     @Override
@@ -320,26 +318,17 @@ class SHandler implements Runnable {
                         try {
                             l.lock();
                             int id = Integer.parseInt(divide[1]);
-                            if(!leiloes.containsKey(id)){
-                                List<Utilizador> aux = new ArrayList();
-                                leiloes.put(id,aux);
-                            }
                             Utilizador u = contas.getUtilizadores().get(nome);
-                            leiloes.get(id).add(u);
                             servidores.getServidores().get(id).addValorL();
+                            String prevowner = servidores.getServidores().get(id).getOwner();
+                            servidores.getServidores().get(id).setOwner(nome);
                             /*regista licitacao*/
-                            while((servidores.getServidores().get(id).getDisponivel()) && (Calendar.getInstance().getTime().compareTo(servidores.getServidores().get(id).getDataf()) <= 0)) {
-                                try {
-                                    u.l.lock();
-                                    out.println(id+nome);                              
-                                    u.condC.await();
-                                }
-                             finally {
-                                    u.l.unlock();
-                                }
-                            }
-                        } catch (InterruptedException ex) {
-                        Logger.getLogger(SHandler.class.getName()).log(Level.SEVERE, null, ex);
+                            PrintWriter bw = clientOut.getCout().get(nome);
+                            bw.println(id+nome);
+                            bw.flush();
+                            bw = clientOut.getCout().get(prevowner);
+                            bw.println("notityNL"+" "+id+prevowner);
+                            bw.flush();
                         }finally {
                             l.unlock();
                         } 

@@ -47,17 +47,24 @@ class CReader implements Runnable{
         try {
             while((scan = in.readLine())!=null){
                 scanner = scan.split(" ");
-                if(scanner[0].equals("notify")){
+                String choice = scanner[0];
+                switch(choice) {
+                    case "notify" :
                     System.out.println("FICASTE SEM SERVER SUA BESTA!!");
-                }
-                else{
+                    break;
+                        
+                    case "notifyNL" :
+                        System.out.println("Alguma besta deu mais do que tu no leilão com o código:"+scanner[1]);
+                        
+                    default :     
                         clog.addC(scan); 
+                    }
                 }
-            }
         } catch (IOException ex) {
             Logger.getLogger(CReader.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+    
 }
 
 
@@ -409,7 +416,7 @@ class CHandler implements Runnable{
     private void verLeilao(int id) throws IOException, InterruptedException {
         Scanner scanner = new Scanner(System.in);
         System.out.println("1 - Licitar servidor");
-        System.out.println("0 - Voltar ao menu anterior");
+        System.out.println("0 - Voltar ao menu dos leilões");
         String linha;
         int choice  = scanner.nextInt();
 
@@ -417,11 +424,12 @@ class CHandler implements Runnable{
                 case 1 :
                     out.println("lic"+" "+id);
                     linha = clog.getLog();
-                    System.out.println("Código para confirmar licitação: "+linha);
+                    System.out.println("Código para reclamar leilão:"+linha);
+                    displayMenuLogged();
                     break;
 
                 case 0 :
-                    verLeilao(id);
+                    displayLeiloes();
                     break;
                 default :
                     System.out.println("Opçao invalida....");
